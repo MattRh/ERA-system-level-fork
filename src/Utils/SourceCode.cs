@@ -3,11 +3,14 @@ using System.Text;
 
 namespace Erasystemlevel
 {
+    // todo
+    // обратабывает переносы строк
+    // добавляет перенос строки в конце
     public class SourceCode
     {
         private FileStream _fileStream;
 
-        private SourceCode(string filePath)
+        public SourceCode(string filePath)
         {
             _fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
 
@@ -19,12 +22,13 @@ namespace Erasystemlevel
             // todo
         }
 
-        public void Close()
+        public char PopChar()
         {
             // todo
+            return '';
         }
 
-        public char NextChar()
+        public char PeekChar()
         {
             // todo
             return '';

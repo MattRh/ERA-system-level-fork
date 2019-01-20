@@ -9,6 +9,7 @@ namespace src.Tokenizer
         Number,
         Register,
         Comment,
+        NewLine,
     }
 
     public class Token
