@@ -16,14 +16,19 @@ namespace src.Tokenizer
     {
         public readonly TokenType Type;
         public readonly string Value;
+        public readonly (int, int) Position;
 
-        public Token(TokenType type, string value)
+        public Token(TokenType type, string value, (int, int) position)
         {
             this.Type = type;
             this.Value = value;
+            this.Position = position;
         }
 
-        public string ToJsonString() => $"{{{Type}: {Value}}}";
+        public string ToJsonString()
+        {
+            return $"{{type: {Type}, pos: {Position}, value: {Value}}}";
+        } 
 
         public override string ToString() => Value;
 

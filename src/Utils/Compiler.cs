@@ -13,9 +13,7 @@ namespace Erasystemlevel
         public Tokenizer Tokenizer { get; private set; }
         public TokenStream TokenStream { get; private set; }
 
-        /*public Tokenizer tokenizer;
-        public TokenReader tokenReader;
-        public AstNode astTree;*/
+        /*public AstNode astTree;*/
 
         public Compiler(string filepath)
         {
@@ -41,6 +39,8 @@ namespace Erasystemlevel
         {
             Tokenizer = new Tokenizer(SourceCode);
             Tokenizer.Process();
+            
+            PrintDebug(Tokenizer);
 
             TokenStream = new TokenStream(Tokenizer);
         }
@@ -74,6 +74,17 @@ namespace Erasystemlevel
             var asmCode = codeGen.assembly.ToString();
             printDebug("Generated assembly:\n" + asmCode);
         }*/
+
+        private void PrintDebug(Tokenizer tokenizer)
+        {
+            if (Debug)
+            {
+                foreach (var token in tokenizer.Tokens)
+                {
+                    Console.WriteLine(token.ToJsonString());
+                }
+            }
+        }
 
         private void PrintDebug(string line)
         {
