@@ -46,8 +46,8 @@
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="Program.cs" />
         <Compile Include="Tokenizer\*" />
-        <!--<Compile Include="Parser\*" />
-        <Compile Include="Semantic\*" />
+        <Compile Include="Parser\*" />
+        <!--<Compile Include="Semantic\*" />
         <Compile Include="Generator\*" />-->
         <Compile Include="Exception\*" />
         <Compile Include="Utils\*" />

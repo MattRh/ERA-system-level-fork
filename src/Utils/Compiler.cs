@@ -19,7 +19,7 @@ namespace Erasystemlevel
             Read(filepath);
         }
 
-        public string compile()
+        public string Compile()
         {
             Tokenize();
 //            Parse();

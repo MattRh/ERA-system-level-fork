@@ -15,7 +15,7 @@ namespace src
             string eraAsm;
             try
             {
-                eraAsm = compiler.compile();
+                eraAsm = compiler.Compile();
             }
             catch (TokenizationError e)
             {
