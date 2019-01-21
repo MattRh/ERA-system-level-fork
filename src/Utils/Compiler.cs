@@ -1,5 +1,4 @@
 using System;
-using src.Parser;
 using src.Tokenizer;
 
 namespace Erasystemlevel
@@ -39,10 +38,10 @@ namespace Erasystemlevel
         {
             Tokenizer = new Tokenizer(SourceCode);
             Tokenizer.Process();
-            
-            PrintDebug(Tokenizer);
+            //PrintDebug(Tokenizer);
 
             TokenStream = new TokenStream(Tokenizer);
+            //PrintDebug(TokenStream);
         }
 
         /*private void Parse()
@@ -77,16 +76,32 @@ namespace Erasystemlevel
 
         private void PrintDebug(Tokenizer tokenizer)
         {
-            if (Debug)
+            foreach (var token in tokenizer.Tokens)
             {
-                foreach (var token in tokenizer.Tokens)
-                {
-                    Console.WriteLine(token.ToJsonString());
-                }
+                PrintDebug(token.ToJsonString());
             }
+
+            PrintDebug("");
         }
 
-        private void PrintDebug(string line)
+        private void PrintDebug(TokenStream tokenStream)
+        {
+            Token next;
+            do
+            {
+                next = tokenStream.Next();
+                if (next != null)
+                {
+                    PrintDebug(next.ToJsonString());
+                }
+            } while (next != null);
+
+            tokenStream.Reset();
+
+            PrintDebug("");
+        }
+
+        private static void PrintDebug(string line)
         {
             if (Debug)
             {
