@@ -2,7 +2,7 @@
 
 namespace Erasystemlevel.Exception
 {
-    public class SyntaxError : SystemException
+    public class SyntaxError : CompilationError
     {
         public SyntaxError(string message) : base(message)
         {
