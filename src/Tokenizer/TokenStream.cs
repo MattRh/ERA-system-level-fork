@@ -32,7 +32,11 @@ namespace src.Tokenizer
             do
             {
                 res = GetToken(--pos);
-            } while (res != null && InSkipList(res));
+                if (res == null)
+                {
+                    break;
+                }
+            } while (InSkipList(res));
 
             if (movePointer)
             {
@@ -55,7 +59,11 @@ namespace src.Tokenizer
             do
             {
                 res = GetToken(pos++);
-            } while (res != null && InSkipList(res));
+                if (res == null)
+                {
+                    break;
+                }
+            } while (InSkipList(res));
 
             if (movePointer)
             {

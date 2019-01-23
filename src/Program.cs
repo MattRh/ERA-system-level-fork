@@ -17,24 +17,11 @@ namespace src
             {
                 eraAsm = compiler.Compile();
             }
-            catch (TokenizationError e)
+            catch (CompilationError e)
             {
-                PrintError("Tokenization error: ", e);
-                return;
-            }
-            catch (SyntaxError e)
-            {
-                PrintError("Syntax error: ", e);
-                return;
-            }
-            catch (SemanticError e)
-            {
-                PrintError("Semantic error: ", e);
-                return;
-            }
-            catch (GenerationError e)
-            {
-                PrintError("Generation error: ", e);
+                e.Source = compiler.SourceCode;
+                Console.WriteLine(e.Verbose());
+                
                 return;
             }
 

@@ -128,9 +128,9 @@ namespace src.Tokenizer
 
                 if (_identifier.IsMatch(readSequence))
                 {
-                    while (_idSymbol.IsMatch(Source.PeekChar().ToString()))
+                    if(_idSymbol.IsMatch(Source.PeekChar().ToString()))
                     {
-                        readSequence += ReadSymbol();
+                        continue;
                     }
 
                     return MakeToken(TokenType.Identifier, readSequence);
@@ -138,9 +138,9 @@ namespace src.Tokenizer
 
                 if (_numeric.IsMatch(readSequence))
                 {
-                    while (_numeric.IsMatch(readSequence + Source.PeekChar()))
+                    if(_numeric.IsMatch(readSequence + Source.PeekChar()))
                     {
-                        readSequence += ReadSymbol();
+                        continue;
                     }
 
                     return MakeToken(TokenType.Number, readSequence);

@@ -25,6 +25,11 @@ namespace src.Tokenizer
             this.Position = position;
         }
 
+        public bool IsKeyword(string name)
+        {
+            return Type == TokenType.Keyword && Value == name;
+        }
+        
         public string ToJsonString()
         {
             return $"{{type: {Type}, pos: {Position}, value: {Value}}}";

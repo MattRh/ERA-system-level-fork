@@ -79,7 +79,7 @@ namespace Erasystemlevel
         {
             var lines = _fullText.Split('\n');
 
-            return lines.Length < number ? "" : lines[number - 1];
+            return lines.Length <= number ? "" : lines[number];
         }
 
         public string Highlight(int line, int? symbol, int? length)
@@ -87,7 +87,7 @@ namespace Erasystemlevel
             var res = Line(line);
             if (symbol != null)
             {
-                res += MakeHighlight((int) symbol, length);
+                res += "\n" + MakeHighlight((int) symbol, length);
             }
 
             return res;
@@ -100,7 +100,7 @@ namespace Erasystemlevel
                 length = 1;
             }
 
-            var dashesLen = Math.Max(0, offset - 1);
+            var dashesLen = Math.Max(0, offset);
             var dashes = new string('-', dashesLen);
 
             var pointer = new string('^', (int) length);

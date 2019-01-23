@@ -16,11 +16,11 @@ namespace src.Parser
 
         public AstNode ParseUnit()
         {
-            var unit = new AstNode(NodeType.Unit);
+            var node = new AstNode(NodeType.Unit);
 
             while (_stream.HasTokens())
             {
-                var next = TryVariants(new Func<AstNode>[]
+                var nextNode = TryVariants(new Func<AstNode>[]
                 {
                     ParseData,
                     ParseModule,
@@ -28,40 +28,81 @@ namespace src.Parser
                     ParseCode,
                 });
 
-                if (next != null)
+                if (nextNode != null)
                 {
-                    unit.Children.Add(next);
+                    node.Children.Add(nextNode);
                 }
                 else
                 {
-                    throw new SyntaxError("Failed to parse unit");
+                    var nextToken = _stream.Next();
+                    throw new SyntaxError($"Failed to parse unit. Invalid token `{nextToken}` encountered", nextToken);
                 }
             }
 
-            return unit;
+            return node;
         }
 
-        internal AstNode ParseCode()
+        private AstNode ParseCode()
+        {
+            var nextToken = _stream.Next();
+            if (!nextToken.IsKeyword("code")) return null;
+
+            var node = new AstNode(NodeType.Code);
+            _stream.Fixate();
+
+            var children = AllChildren(new Func<AstNode>[]
+            {
+                ParseVariable,
+                ParseConstant,
+                ParseStatment,
+            });
+            node.Children.AddRange(children);
+
+            nextToken = _stream.Next();
+            if (nextToken == null)
+            {
+                throw new SyntaxError("Unexpected end of stream");
+            }
+
+            if (!nextToken.IsKeyword("end"))
+            {
+                throw new SyntaxError($"Unexpected token. Expected `end` by got `{nextToken}`", nextToken);
+            }
+
+            return node;
+        }
+
+        private AstNode ParseData()
         {
             return null;
         }
 
-        internal AstNode ParseData()
+        private AstNode ParseModule()
         {
             return null;
         }
 
-        internal AstNode ParseModule()
+        private AstNode ParseRoutine()
         {
             return null;
         }
 
-        internal AstNode ParseRoutine()
+        private AstNode ParseVariable()
         {
             return null;
         }
 
-        internal AstNode ParseTMP()
+        private AstNode ParseConstant()
+        {
+            return null;
+        }
+
+        private AstNode ParseStatment()
+        {
+            return null;
+        }
+
+        private AstNode ParseTMP()
         {
             return null;
         }
@@ -76,9 +117,30 @@ namespace src.Parser
                     _stream.Fixate();
                     return res;
                 }
+                else
+                {
+                    _stream.Rollback();
+                }
             }
 
             return null;
+        }
+
+        private IEnumerable<AstNode> AllChildren(IEnumerable<Func<AstNode>> extractors)
+        {
+            var found = new List<AstNode>();
+
+            AstNode nextNode;
+            do
+            {
+                nextNode = TryVariants(extractors);
+                if (nextNode != null)
+                {
+                    found.Add(nextNode);
+                }
+            } while (nextNode != null);
+
+            return found;
         }
     }
 }
