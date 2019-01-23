@@ -15,13 +15,13 @@ namespace src.Parser
 
         private int? _numeric;
 
-        AstNode(NodeType type, string value)
+        public AstNode(NodeType type, string value = null)
         {
             this.Type = type;
             this.Value = value;
         }
 
-        AstNode(NodeType type, Token token) : this(type, token.Value)
+        public AstNode(NodeType type, Token token) : this(type, token.Value)
         {
             this.Token = token;
         }

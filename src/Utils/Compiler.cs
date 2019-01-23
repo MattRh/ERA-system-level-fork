@@ -1,4 +1,5 @@
 using System;
+using src.Parser;
 using src.Tokenizer;
 
 namespace Erasystemlevel
@@ -9,10 +10,12 @@ namespace Erasystemlevel
         private const bool Optimize = true;
 
         public SourceCode SourceCode { get; private set; }
+
         public Tokenizer Tokenizer { get; private set; }
         public TokenStream TokenStream { get; private set; }
 
-        /*public AstNode astTree;*/
+        public Parser Parser { get; private set; }
+        public AstNode AstTree { get; private set; }
 
         public Compiler(string filepath)
         {
@@ -22,7 +25,7 @@ namespace Erasystemlevel
         public string Compile()
         {
             Tokenize();
-//            Parse();
+            Parse();
 //            Analyze();
 //            Generate();
 
@@ -44,12 +47,13 @@ namespace Erasystemlevel
             //PrintDebug(TokenStream);
         }
 
-        /*private void Parse()
+        private void Parse()
         {
-            Parser.Parser._debug = false;
-            astTree = Parser.Parser.ParseUnit(tokenReader);
-            printDebug("Parse tree:\n" + astTree + "\n");
-        }*/
+            Parser = new Parser(TokenStream);
+
+            AstTree = Parser.ParseUnit();
+            PrintDebug(AstTree);
+        }
 
         /*private void Analyze()
         {
@@ -74,7 +78,7 @@ namespace Erasystemlevel
             printDebug("Generated assembly:\n" + asmCode);
         }*/
 
-        private void PrintDebug(Tokenizer tokenizer)
+        private static void PrintDebug(Tokenizer tokenizer)
         {
             foreach (var token in tokenizer.Tokens)
             {
@@ -84,7 +88,7 @@ namespace Erasystemlevel
             PrintDebug("");
         }
 
-        private void PrintDebug(TokenStream tokenStream)
+        private static void PrintDebug(TokenStream tokenStream)
         {
             Token next;
             do
@@ -97,6 +101,13 @@ namespace Erasystemlevel
             } while (next != null);
 
             tokenStream.Reset();
+
+            PrintDebug("");
+        }
+
+        private static void PrintDebug(AstNode astTree)
+        {
+            PrintDebug("Parse tree:\n" + astTree);
 
             PrintDebug("");
         }

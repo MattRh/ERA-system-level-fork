@@ -11,6 +11,7 @@ namespace src.Tokenizer
 
         private readonly Tokenizer _tokenizer;
         private int _position = 0;
+        private int _checkpoint = 0;
 
         public TokenStream(Tokenizer tokenizer)
         {
@@ -20,24 +21,7 @@ namespace src.Tokenizer
         public void Reset()
         {
             _position = 0;
-        }
-
-        public Token Next(bool movePointer = true)
-        {
-            var pos = _position;
-
-            Token res;
-            do
-            {
-                res = GetToken(pos++);
-            } while (res != null && _skipList.Contains(res.Type));
-
-            if (movePointer)
-            {
-                _position = pos;
-            }
-
-            return res;
+            _checkpoint = 0;
         }
 
         public Token Previous(bool movePointer = true)
@@ -48,7 +32,7 @@ namespace src.Tokenizer
             do
             {
                 res = GetToken(--pos);
-            } while (res != null && _skipList.Contains(res.Type));
+            } while (res != null && InSkipList(res));
 
             if (movePointer)
             {
@@ -56,6 +40,44 @@ namespace src.Tokenizer
             }
 
             return res;
+        }
+
+        public Token Current()
+        {
+            return GetToken(_position);
+        }
+
+        public Token Next(bool movePointer = true)
+        {
+            var pos = _position;
+
+            Token res;
+            do
+            {
+                res = GetToken(pos++);
+            } while (res != null && InSkipList(res));
+
+            if (movePointer)
+            {
+                _position = pos;
+            }
+
+            return res;
+        }
+
+        public bool HasTokens()
+        {
+            return Next(false) != null;
+        }
+
+        public void Rollback()
+        {
+            _position = _checkpoint;
+        }
+
+        public void Fixate()
+        {
+            _checkpoint = _position;
         }
 
         private Token GetToken(int pos)
@@ -66,6 +88,11 @@ namespace src.Tokenizer
             }
 
             return _tokenizer.Tokens[pos];
+        }
+
+        private bool InSkipList(Token token)
+        {
+            return _skipList.Contains(token.Type);
         }
     }
 }
