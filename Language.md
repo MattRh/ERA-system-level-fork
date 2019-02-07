@@ -118,5 +118,5 @@ Language supports only one-line comments that starts with `//`
 
 ## Future plans
 
-[ ] Create functions with different interface  
+[ ] Allow functions overloading  
 [ ] Allow multiple breaks at once  
