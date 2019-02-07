@@ -112,14 +112,14 @@ namespace src.Parser
             foreach (var parse in variants)
             {
                 var res = parse();
-                if (res != null)
+                if (res == null)
                 {
-                    _stream.Fixate();
-                    return res;
+                    _stream.Rollback();
                 }
                 else
                 {
-                    _stream.Rollback();
+                    _stream.Fixate();
+                    return res;
                 }
             }
 
