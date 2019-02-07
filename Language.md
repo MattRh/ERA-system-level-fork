@@ -106,6 +106,7 @@
 * `entry` functions has to have function body, `start` functions are declarations of interface and can't have function body.
 * Constants can't be changed, thus they can't be used in 'for' loops.
 * 'Directive' affects only the next 'Assembler statement'.
+* Language does not support floating point and unsigned values
 
 ## Annotations
 
