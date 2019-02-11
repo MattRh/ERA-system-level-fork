@@ -122,6 +122,7 @@
 
 Allows to specify some compile-time flags.  List of **possible** flags
 * `save(`Registers list`)` - tells compiler not to use this registers indirectly
+* `prefer(`Registers list`)` - tells compiler to prioritize usage of given registers
 * `optimizer(`Enable | Disable`)` - tells compiler to enable/disable some code optimization techniques
 
 ## Comments
