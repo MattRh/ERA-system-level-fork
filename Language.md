@@ -4,7 +4,7 @@
 ### Part 1: Common program structure
 >// Arbitrary sequence of data declarations, modules, routines and code blocks
 * **Program** : { Annotation | Data | Module | Routine | Code }
-* **Annotation** : `#` Identifier [ AnnotationParams ]
+* **Annotation** : `pragma` PragmaDeclaration { `,` PragmaDeclaration } `;`
 >// Named sequence of literal values
 * **Data** : `data` Identifier [ Literal { `,` Literal } ] `end`
 >// A named collection of resources: data and routines
@@ -13,7 +13,7 @@
 
 ---
 
-* **AnnotationParams** : `<` { Text } `>`
+* **PragmaDeclaration** : Identifier `(` [ Text ] `)`
 * **VarDeclaration** : Variable | Constant
 * **Variable** : Type VarDefinition { `,` VarDefinition } `;`
 * **Type** : `int` | `short` | `byte`
@@ -29,16 +29,19 @@
 * **Parameter** : Type Identifier | Register
 * **Results** : `:` Register { `,` Register }
 * **RoutineBody** : `do` { VarDeclaration | Statement } `end`
-* **Statement** : { Label } ( Directive | AssemblerStatement | ExtensionStatement )
+* **Statement** : [ Label ] ( AssemblyBlock | ExtensionStatement )
 * **Label** : `<` Identifier `>`
 
 ---
 
 ### Part XXX: directives, assembly statements and registers
-* **Directive** : `format` ( 8 | 16 | 32 ) `;`
-* AssemblerStatement  
+* **AssemblyBlock**: `asm`  
+&emsp;( AssemblyStatement `;`  
+&emsp;| AssemblyStatement { `,` AssemblyStatement } `end` )
+* **AssemblyStatement**  
 &emsp;: `skip` // NOP  
 &emsp;| `stop` // STOP  
+&emsp;| `format` ( 8 | 16 | 32 ) // format of next command  
 &emsp;| Register `:=` `*`Register // Rj := \*Ri LD  
 &emsp;| Register `:=` Expression // Rj := Const LDA  
 &emsp;| `*`Register `:=` Register // \*Rj := Ri ST  
@@ -71,9 +74,9 @@
 
 ---
 
-* **If** : `if` Expression `do` BlockBody ( `end` | `elif` If | `else` BlockBody `end` ) )
-* **Call** : [ Identifier`.` ] Identifier CallParms
-* **CallParms** : `(`[ Expression { , Expression } ]`)`
+* **If** : `if` Expression `do` BlockBody ( `end` | `elif` If | `else` BlockBody `end` )
+* **Call** : [ Identifier`.` ] Identifier CallArgs
+* **CallArgs** : `( `[ Expression { , Expression } ] `)`
 
 ---
 
@@ -92,7 +95,7 @@
 
 * **Identifier** : *(_a-zA-Z0-9)+*
 * **Literal**: *(0-9)+*
-* **Text**: *(\\.\\-_a-zA-Z0-9)+*
+* **Text**: *(\\,\\.\\-_a-zA-Z0-9)+*
 
 ## Default values
 
@@ -107,15 +110,19 @@
 
 * Accessed functions and modules has to be already defined. For functions, at least it's interface has to be defined.  
 * There is no functions\module overloading.
-* `entry` functions has to have function body, `start` functions are declarations of interface and can't have function body.
+* `entry` functions must have function body, `start` functions are declarations of interface and can't have function body.
 * Constants can't be changed, thus they can't be used in 'for' loops.
-* Array size must be non-negative.
+* Array size must be non-negative and compile-time constant.
+* 'Expression' in assembly-statement assignment must be compile-time constant.
 * 'Directive' affects only the next 'Assembler statement'.
+* 'Code' block can be used only once.
 * Language does not support floating point and unsigned values.
 
 ## Annotations
 
-// todo
+Allows to specify some compile-time flags.  List of **possible** flags
+* `save(`Registers list`)` - tells compiler not to use this registers indirectly
+* `optimizer(`Enable | Disable`)` - tells compiler to enable/disable some code optimization techniques
 
 ## Comments
 
@@ -124,10 +131,10 @@ Language supports only one-line comments that starts with `//`
 ## Future plans
 
 [ ] Allow functions overloading  
-[ ] Allow multiple breaks at once  
-[ ] Add operations or array
-[ ] Add array and struct default initializer
-[ ] Add custom structs support. For that we would have to change grammar  
+[ ] Allow multiple breaks at once: requires grammar change  
+[ ] Add operations on array: 'sizeof(\_)' and negative indexes usage  
+[ ] Add array and struct default initializer: via '{\_, \_, ..}' construction assignment  
+[ ] Add custom structs support: requires grammar change   
 
 ### FP: changes for structs support
 
