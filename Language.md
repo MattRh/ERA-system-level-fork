@@ -1,16 +1,19 @@
 # Language Description
 
 ## Grammar
-
+### Part 1: Common program structure
+>// Arbitrary sequence of data declarations, modules, routines and code blocks
 * **Program** : { Annotation | Data | Module | Routine | Code }
 * **Annotation** : `#` Identifier [ AnnotationParams ]
-* **AnnotationParams** : `<` { Text } `>`
+>// Named sequence of literal values
 * **Data** : `data` Identifier [ Literal { `,` Literal } ] `end`
+>// A named collection of resources: data and routines
 * **Module** : `module` Identifier { VarDeclaration | Routine } `end`
 * **Code** : `code` { VarDeclaration | Statement } `end`
 
 ---
 
+* **AnnotationParams** : `<` { Text } `>`
 * **VarDeclaration** : Variable | Constant
 * **Variable** : Type VarDefinition { `,` VarDefinition } `;`
 * **Type** : `int` | `short` | `byte`
@@ -28,10 +31,11 @@
 * **RoutineBody** : `do` { VarDeclaration | Statement } `end`
 * **Statement** : { Label } ( Directive | AssemblerStatement | ExtensionStatement )
 * **Label** : `<` Identifier `>`
-* **Directive** : `format` ( 8 | 16 | 32 ) `;`
 
 ---
 
+### Part XXX: directives, assembly statements and registers
+* **Directive** : `format` ( 8 | 16 | 32 ) `;`
 * AssemblerStatement  
 &emsp;: `skip` // NOP  
 &emsp;| `stop` // STOP  
