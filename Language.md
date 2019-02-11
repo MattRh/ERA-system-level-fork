@@ -17,7 +17,7 @@
 * **VarDeclaration** : Variable | Constant
 * **Variable** : Type VarDefinition { `,` VarDefinition } `;`
 * **Type** : `int` | `short` | `byte`
-* **VarDefinition** : Identifier [ `:=` Expression ]
+* **VarDefinition** : Identifier [ `:=` Expression ] | Identifier `[` Expression `]`
 * **Constant** : `const` ConstDefinition { `,` ConstDefinition } `;`
 * **ConstDefinition** : Identifier `=` Expression
 
@@ -109,8 +109,9 @@
 * There is no functions\module overloading.
 * `entry` functions has to have function body, `start` functions are declarations of interface and can't have function body.
 * Constants can't be changed, thus they can't be used in 'for' loops.
+* Array size must be non-negative.
 * 'Directive' affects only the next 'Assembler statement'.
-* Language does not support floating point and unsigned values
+* Language does not support floating point and unsigned values.
 
 ## Annotations
 
@@ -124,3 +125,11 @@ Language supports only one-line comments that starts with `//`
 
 [ ] Allow functions overloading  
 [ ] Allow multiple breaks at once  
+[ ] Add operations or array
+[ ] Add array and struct default initializer
+[ ] Add custom structs support. For that we would have to change grammar  
+
+### FP: changes for structs support
+
+* **Type** : `int` | `short` | `byte` | Identifier
+* **Struct** : `struct` Identifier { VarDeclaration } `end`
