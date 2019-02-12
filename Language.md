@@ -76,7 +76,7 @@
 
 * **If** : `if` Expression `do` BlockBody ( `end` | `elif` If | `else` BlockBody `end` )
 * **Call** : [ Identifier`.` ] Identifier CallArgs
-* **CallArgs** : `( `[ Expression { , Expression } ] `)`
+* **CallArgs** : `(` [ Expression { , Expression } ] `)`
 
 ---
 
@@ -91,7 +91,7 @@
 * **Dereference** : `*` ( Identifier | Register )
 * **ExplicitAddress** : `*` Literal
 
----
+## Terminals
 
 * **Identifier** : *(_a-zA-Z0-9)+*
 * **Literal**: *(0-9)+*
