@@ -26,6 +26,7 @@ namespace Erasystemlevel
             _fullText = reader.ReadToEnd();
 
             // Convert CRLF and CR to LF
+            // that is possible to do on this stage due to lack of strings support in our language
             _fullText = _fullText.Replace("\r\n", "\n")
                 .Replace("\n\r", "\n")
                 .Replace("\r", "\n");
@@ -42,7 +43,7 @@ namespace Erasystemlevel
             Symbol = 0;
         }
 
-        public char PopChar()
+        public string PopChar()
         {
             var next = PeekChar();
             Symbol++;
@@ -50,14 +51,14 @@ namespace Erasystemlevel
             return next;
         }
 
-        public char PeekChar()
+        public string PeekChar()
         {
             if (EndOfFile())
             {
                 throw new SecurityException("Failed to peek symbol. End of file is reached");
             }
 
-            return _fullText[Symbol];
+            return _fullText[Symbol].ToString();
         }
 
         public void GoBack(int symbols = 1)

@@ -14,30 +14,10 @@ namespace src.Tokenizer
 
         private readonly Regex _idSymbol = new Regex("[A-Za-z0-9_]");
 
-        private readonly HashSet<string> _delimiters = new HashSet<string>()
-        {
-            ";", ",", ".", "(", ")", "[", "]", ":>"
-        };
-
-        private readonly HashSet<string> _operators = new HashSet<string>()
-        {
-            "+", "-", "*", "&", "|", "^", "?", "=", "<", ">", "/=", ":=",
-            "+=", "-=", ">>=", "<<=", "|=", "&=", "^=", "<=", ">=", "?=",
-            "<=>"
-        };
-
-        private readonly HashSet<string> _keywords = new HashSet<string>()
-        {
-            "if", "else", "int", "short", "byte", "const", "routine", "do", "end",
-            "start", "entry", "skip", "stop", "goto", "format", "for", "from", "to",
-            "step", "while", "loop", "break", "then", "by", "trace", "data", "module", "code",
-            "this"
-        };
-
-        private readonly HashSet<string> _whitespace = new HashSet<string>()
-        {
-            "", " ", "\n", "\r", "\t"
-        };
+        private readonly HashSet<string> _delimiters = new HashSet<string>(TerminalsHelper.TerminalsList(typeof(Delimiter)));
+        private readonly HashSet<string> _operators = new HashSet<string>(TerminalsHelper.TerminalsList(typeof(Operator)));
+        private readonly HashSet<string> _keywords = new HashSet<string>(TerminalsHelper.TerminalsList(typeof(Keyword)));
+        private readonly HashSet<string> _whitespace = new HashSet<string>(TerminalsHelper.TerminalsList(typeof(Whitespace)));
 
         public readonly SourceCode Source;
 
@@ -70,7 +50,7 @@ namespace src.Tokenizer
             {
                 var next = ReadSymbol();
 
-                if (next.Equals("\n"))
+                if (next.Equals(Whitespace.NewLine))
                 {
                     if (readSequence.Length > 0)
                     {
@@ -80,17 +60,22 @@ namespace src.Tokenizer
                     return MakeToken(TokenType.NewLine, null);
                 }
 
-                if (_whitespace.Contains(next))
+                if (_whitespace.Contains(next) || next.Equals(OtherTerminals.Empty))
                 {
                     continue;
                 }
 
                 readSequence += next;
 
-                if (readSequence.Equals("//"))
+                if (readSequence.Equals(OtherTerminals.LineComment))
                 {
-                    var text = ReadLine();
+                    var text = ReadRemainingLine();
                     return MakeToken(TokenType.Comment, text);
+                }
+
+                if (_idSymbol.IsMatch(Source.PeekChar()) || _numeric.IsMatch(readSequence + Source.PeekChar()))
+                {
+                    continue;
                 }
 
                 if (_delimiters.Contains(readSequence))
@@ -100,7 +85,7 @@ namespace src.Tokenizer
 
                 if (_register.IsMatch(readSequence))
                 {
-                    var lookahead = Source.PeekChar().ToString();
+                    var lookahead = Source.PeekChar();
                     if (!_idSymbol.IsMatch(lookahead))
                     {
                         return MakeToken(TokenType.Register, readSequence);
@@ -119,7 +104,7 @@ namespace src.Tokenizer
 
                 if (_keywords.Contains(readSequence))
                 {
-                    var lookahead = Source.PeekChar().ToString();
+                    var lookahead = Source.PeekChar();
                     if (!_idSymbol.IsMatch(lookahead) || _whitespace.Contains(lookahead))
                     {
                         return MakeToken(TokenType.Keyword, readSequence);
@@ -128,21 +113,11 @@ namespace src.Tokenizer
 
                 if (_identifier.IsMatch(readSequence))
                 {
-                    if(_idSymbol.IsMatch(Source.PeekChar().ToString()))
-                    {
-                        continue;
-                    }
-
                     return MakeToken(TokenType.Identifier, readSequence);
                 }
 
                 if (_numeric.IsMatch(readSequence))
                 {
-                    if(_numeric.IsMatch(readSequence + Source.PeekChar()))
-                    {
-                        continue;
-                    }
-
                     return MakeToken(TokenType.Number, readSequence);
                 }
             }
@@ -167,28 +142,28 @@ namespace src.Tokenizer
         private Token MakeToken(TokenType type, string value)
         {
             var pos = CurrentPosition;
-            
+
             // Fix newline token
             if (type == TokenType.NewLine)
             {
                 pos.Item1--; // Decrease line
                 pos.Item2 = _prevLineLength + 1; // Set old line length and one character longer
             }
-            
+
             return new Token(type, value, pos);
-        } 
+        }
 
         private string ReadSymbol()
         {
-            var next = Source.PopChar().ToString();
-            if (next.Equals("\n"))
+            var next = Source.PopChar();
+            if (next.Equals(Whitespace.NewLine))
             {
                 _prevLineLength = CurrentSymbol;
-                
+
                 CurrentLine += 1;
                 CurrentSymbol = 0;
             }
-            else if (!next.Equals(""))
+            else if (!next.Equals(OtherTerminals.Empty))
             {
                 CurrentSymbol += 1;
             }
@@ -196,10 +171,10 @@ namespace src.Tokenizer
             return next;
         }
 
-        private string ReadLine()
+        private string ReadRemainingLine()
         {
             var text = string.Empty;
-            while (!Source.EndOfFile() && !Source.PeekChar().Equals('\n'))
+            while (!Source.EndOfFile() && !Source.PeekChar().Equals(Whitespace.NewLine))
             {
                 text += ReadSymbol();
             }
