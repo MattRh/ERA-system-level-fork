@@ -28,13 +28,11 @@ namespace src.Parser
 
         public int NumericValue()
         {
-            if (Type != NodeType.Literal)
-            {
+            if (Type != NodeType.Literal) {
                 throw new ArgumentException("Can't get numeric value from non-literal node");
             }
 
-            if (_numeric == null)
-            {
+            if (_numeric == null) {
                 _numeric = int.Parse(Value);
             }
 
@@ -44,14 +42,12 @@ namespace src.Parser
         public override string ToString()
         {
             var currentName = Type.ToString();
-            if (!string.IsNullOrEmpty(Value) && !currentName.Equals(Value))
-            {
+            if (!string.IsNullOrEmpty(Value) && !currentName.Equals(Value)) {
                 currentName += "(" + Value + ")";
             }
 
             var childrenJson = "";
-            foreach (var i in Children)
-            {
+            foreach (var i in Children) {
                 var childrenList = i.ToString().Split('\n');
                 var formattedChildren = childrenList.Aggregate("", (current, j) => $"{current} {j}\n");
 
@@ -59,8 +55,7 @@ namespace src.Parser
             }
 
             var currentJson = currentName;
-            if (childrenJson.Length > 0)
-            {
+            if (childrenJson.Length > 0) {
                 currentJson += ": {\n" + childrenJson + "}";
             }
 

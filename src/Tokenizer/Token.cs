@@ -8,7 +8,7 @@ namespace src.Tokenizer
         Keyword,
         Number,
         Register,
-        Comment,
+        LineComment,
         NewLine,
     }
 
@@ -29,11 +29,11 @@ namespace src.Tokenizer
         {
             return Type == TokenType.Keyword && Value == name;
         }
-        
+
         public string ToJsonString()
         {
             return $"{{type: {Type}, pos: {Position}, value: {Value}}}";
-        } 
+        }
 
         public override string ToString() => Value;
 

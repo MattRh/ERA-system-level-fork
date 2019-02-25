@@ -18,22 +18,18 @@ namespace src.Parser
         {
             var node = new AstNode(NodeType.Unit);
 
-            while (_stream.HasTokens())
-            {
-                var nextNode = TryVariants(new Func<AstNode>[]
-                {
+            while (_stream.HasTokens()) {
+                var nextNode = TryVariants(new Func<AstNode>[] {
                     ParseData,
                     ParseModule,
                     ParseRoutine,
                     ParseCode,
                 });
 
-                if (nextNode != null)
-                {
+                if (nextNode != null) {
                     node.Children.Add(nextNode);
                 }
-                else
-                {
+                else {
                     var nextToken = _stream.Next();
                     throw new SyntaxError($"Failed to parse unit. Invalid token `{nextToken}` encountered", nextToken);
                 }
@@ -50,8 +46,7 @@ namespace src.Parser
             var node = new AstNode(NodeType.Code);
             _stream.Fixate();
 
-            var children = AllChildren(new Func<AstNode>[]
-            {
+            var children = AllChildren(new Func<AstNode>[] {
                 ParseVariable,
                 ParseConstant,
                 ParseStatment,
@@ -59,13 +54,11 @@ namespace src.Parser
             node.Children.AddRange(children);
 
             nextToken = _stream.Next();
-            if (nextToken == null)
-            {
+            if (nextToken == null) {
                 throw new SyntaxError("Unexpected end of stream");
             }
 
-            if (!nextToken.IsKeyword("end"))
-            {
+            if (!nextToken.IsKeyword("end")) {
                 throw new SyntaxError($"Unexpected token. Expected `end` by got `{nextToken}`", nextToken);
             }
 
@@ -109,15 +102,12 @@ namespace src.Parser
 
         private AstNode TryVariants(IEnumerable<Func<AstNode>> variants)
         {
-            foreach (var parse in variants)
-            {
+            foreach (var parse in variants) {
                 var res = parse();
-                if (res == null)
-                {
+                if (res == null) {
                     _stream.Rollback();
                 }
-                else
-                {
+                else {
                     _stream.Fixate();
                     return res;
                 }
@@ -131,11 +121,9 @@ namespace src.Parser
             var found = new List<AstNode>();
 
             AstNode nextNode;
-            do
-            {
+            do {
                 nextNode = TryVariants(extractors);
-                if (nextNode != null)
-                {
+                if (nextNode != null) {
                     found.Add(nextNode);
                 }
             } while (nextNode != null);

@@ -80,8 +80,7 @@ namespace Erasystemlevel
 
         private static void PrintDebug(Tokenizer tokenizer)
         {
-            foreach (var token in tokenizer.Tokens)
-            {
+            foreach (var token in tokenizer.Tokens) {
                 PrintDebug(token.ToJsonString());
             }
 
@@ -91,11 +90,9 @@ namespace Erasystemlevel
         private static void PrintDebug(TokenStream tokenStream)
         {
             Token next;
-            do
-            {
+            do {
                 next = tokenStream.Next();
-                if (next != null)
-                {
+                if (next != null) {
                     PrintDebug(next.ToJsonString());
                 }
             } while (next != null);
@@ -114,8 +111,7 @@ namespace Erasystemlevel
 
         private static void PrintDebug(string line)
         {
-            if (Debug)
-            {
+            if (Debug) {
                 Console.WriteLine(line);
             }
         }

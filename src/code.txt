@@ -1,5 +1,9 @@
+routine ender(): R30 do
+end
+
 code
     const a = 5;
-    const b = 3;
+    int codeb = 3;
+    codeb := 0;
     //cst d = 5;
 end

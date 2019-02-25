@@ -13,15 +13,13 @@ namespace src
             var compiler = new Compiler(CODE_FILE);
 
             string eraAsm;
-            try
-            {
+            try {
                 eraAsm = compiler.Compile();
             }
-            catch (CompilationError e)
-            {
+            catch (CompilationError e) {
                 e.Source = compiler.SourceCode;
                 Console.WriteLine(e.Verbose());
-                
+
                 return;
             }
 

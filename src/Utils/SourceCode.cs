@@ -32,8 +32,7 @@ namespace Erasystemlevel
                 .Replace("\r", "\n");
 
             // Ensure that we always have new line a the end
-            if (!_fullText.EndsWith("\n"))
-            {
+            if (!_fullText.EndsWith("\n")) {
                 _fullText += "\n";
             }
         }
@@ -53,8 +52,7 @@ namespace Erasystemlevel
 
         public string PeekChar()
         {
-            if (EndOfFile())
-            {
+            if (EndOfFile()) {
                 throw new SecurityException("Failed to peek symbol. End of file is reached");
             }
 
@@ -86,8 +84,7 @@ namespace Erasystemlevel
         public string Highlight(int line, int? symbol, int? length)
         {
             var res = Line(line);
-            if (symbol != null)
-            {
+            if (symbol != null) {
                 res += "\n" + MakeHighlight((int) symbol, length);
             }
 
@@ -96,8 +93,7 @@ namespace Erasystemlevel
 
         private static string MakeHighlight(int offset, int? length)
         {
-            if (length == null || length <= 0)
-            {
+            if (length == null || length <= 0) {
                 length = 1;
             }
 

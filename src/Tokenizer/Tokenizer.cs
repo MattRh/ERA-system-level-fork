@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Remoting.Messaging;
 using System.Text.RegularExpressions;
 using Erasystemlevel;
 using Erasystemlevel.Exception;
@@ -14,10 +15,12 @@ namespace src.Tokenizer
 
         private readonly Regex _idSymbol = new Regex("[A-Za-z0-9_]");
 
-        private readonly HashSet<string> _delimiters = new HashSet<string>(TerminalsHelper.TerminalsList(typeof(Delimiter)));
-        private readonly HashSet<string> _operators = new HashSet<string>(TerminalsHelper.TerminalsList(typeof(Operator)));
-        private readonly HashSet<string> _keywords = new HashSet<string>(TerminalsHelper.TerminalsList(typeof(Keyword)));
-        private readonly HashSet<string> _whitespace = new HashSet<string>(TerminalsHelper.TerminalsList(typeof(Whitespace)));
+        private readonly HashSet<string> _delimiters;
+        private readonly HashSet<string> _operators;
+        private readonly HashSet<string> _keywords;
+        private readonly HashSet<string> _whitespace;
+
+        private readonly HashSet<string> _terminals = new HashSet<string>();
 
         public readonly SourceCode Source;
 
@@ -31,13 +34,21 @@ namespace src.Tokenizer
         public Tokenizer(SourceCode source)
         {
             this.Source = source;
+
+            _delimiters = new HashSet<string>(TerminalsHelper.TerminalsList(typeof(Delimiter)));
+            _operators = new HashSet<string>(TerminalsHelper.TerminalsList(typeof(Operator)));
+            _keywords = new HashSet<string>(TerminalsHelper.TerminalsList(typeof(Keyword)));
+            _whitespace = new HashSet<string>(TerminalsHelper.TerminalsList(typeof(Whitespace)));
+
+            _terminals.UnionWith(_delimiters);
+            _terminals.UnionWith(_operators);
+            _terminals.UnionWith(_keywords);
         }
 
         public void Process()
         {
             Token next;
-            while ((next = NextToken()) != null)
-            {
+            while ((next = NextToken()) != null) {
                 Tokens.Add(next);
             }
         }
@@ -46,84 +57,68 @@ namespace src.Tokenizer
         {
             var readSequence = string.Empty;
 
-            while (!Source.EndOfFile())
-            {
+            while (!Source.EndOfFile()) {
                 var next = ReadSymbol();
 
-                if (next.Equals(Whitespace.NewLine))
-                {
-                    if (readSequence.Length > 0)
-                    {
+                if (next.Equals(Whitespace.NewLine)) {
+                    if (readSequence.Length > 0) {
                         throw new TokenizationError($"Got new line, while reading token: `{readSequence}`");
                     }
 
                     return MakeToken(TokenType.NewLine, null);
                 }
 
-                if (_whitespace.Contains(next) || next.Equals(OtherTerminals.Empty))
-                {
+                if (_whitespace.Contains(next) || next.Equals(OtherTerminals.Empty)) {
                     continue;
                 }
 
                 readSequence += next;
 
-                if (readSequence.Equals(OtherTerminals.LineComment))
-                {
+                if (readSequence.Equals(OtherTerminals.LineComment)) {
                     var text = ReadRemainingLine();
-                    return MakeToken(TokenType.Comment, text);
+                    return MakeToken(TokenType.LineComment, text);
                 }
 
-                if (_idSymbol.IsMatch(Source.PeekChar()) || _numeric.IsMatch(readSequence + Source.PeekChar()))
-                {
+                var lookahead = Source.PeekChar();
+                var sequenceLookahead = readSequence + lookahead;
+
+                if (_identifier.IsMatch(sequenceLookahead) || _numeric.IsMatch(sequenceLookahead)) {
                     continue;
                 }
 
-                if (_delimiters.Contains(readSequence))
-                {
-                    return MakeToken(TokenType.Delimiter, readSequence);
-                }
-
-                if (_register.IsMatch(readSequence))
-                {
-                    var lookahead = Source.PeekChar();
-                    if (!_idSymbol.IsMatch(lookahead))
-                    {
-                        return MakeToken(TokenType.Register, readSequence);
-                    }
-                }
-
-                if (_operators.Contains(readSequence))
-                {
-                    while (_operators.Contains(readSequence + Source.PeekChar()))
-                    {
+                // Here starts actual checks for token type
+                if (_terminals.Contains(readSequence)) {
+                    while (_terminals.Contains(readSequence + Source.PeekChar())) {
                         readSequence += ReadSymbol();
                     }
 
-                    return MakeToken(TokenType.Operator, readSequence);
-                }
-
-                if (_keywords.Contains(readSequence))
-                {
-                    var lookahead = Source.PeekChar();
-                    if (!_idSymbol.IsMatch(lookahead) || _whitespace.Contains(lookahead))
-                    {
+                    if (_delimiters.Contains(readSequence)) {
+                        return MakeToken(TokenType.Delimiter, readSequence);
+                    }
+                    if (_operators.Contains(readSequence)) {
+                        return MakeToken(TokenType.Operator, readSequence);
+                    }
+                    if (_keywords.Contains(readSequence)) {
+                        // there should be check for non id symbol in lookahead
+                        // but it is not needed doe to greedy reading
                         return MakeToken(TokenType.Keyword, readSequence);
                     }
                 }
 
-                if (_identifier.IsMatch(readSequence))
-                {
+                if (_register.IsMatch(readSequence)) {
+                    // there should be check for non id symbol in lookahead
+                    // but it is not needed doe to greedy reading
+                    return MakeToken(TokenType.Register, readSequence);
+                }
+                if (_identifier.IsMatch(readSequence)) {
                     return MakeToken(TokenType.Identifier, readSequence);
                 }
-
-                if (_numeric.IsMatch(readSequence))
-                {
+                if (_numeric.IsMatch(readSequence)) {
                     return MakeToken(TokenType.Number, readSequence);
                 }
             }
 
-            if (readSequence.Length > 0)
-            {
+            if (readSequence.Length > 0) {
                 throw new TokenizationError($"Failed to tokenize string: `{readSequence}`");
             }
 
@@ -144,8 +139,7 @@ namespace src.Tokenizer
             var pos = CurrentPosition;
 
             // Fix newline token
-            if (type == TokenType.NewLine)
-            {
+            if (type == TokenType.NewLine) {
                 pos.Item1--; // Decrease line
                 pos.Item2 = _prevLineLength + 1; // Set old line length and one character longer
             }
@@ -156,15 +150,13 @@ namespace src.Tokenizer
         private string ReadSymbol()
         {
             var next = Source.PopChar();
-            if (next.Equals(Whitespace.NewLine))
-            {
+            if (next.Equals(Whitespace.NewLine)) {
                 _prevLineLength = CurrentSymbol;
 
                 CurrentLine += 1;
                 CurrentSymbol = 0;
             }
-            else if (!next.Equals(OtherTerminals.Empty))
-            {
+            else if (!next.Equals(OtherTerminals.Empty)) {
                 CurrentSymbol += 1;
             }
 
@@ -174,8 +166,7 @@ namespace src.Tokenizer
         private string ReadRemainingLine()
         {
             var text = string.Empty;
-            while (!Source.EndOfFile() && !Source.PeekChar().Equals(Whitespace.NewLine))
-            {
+            while (!Source.EndOfFile() && !Source.PeekChar().Equals(Whitespace.NewLine)) {
                 text += ReadSymbol();
             }
 

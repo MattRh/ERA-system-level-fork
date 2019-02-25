@@ -7,7 +7,7 @@ namespace src.Tokenizer
     public class Delimiter
     {
         public const string
-            Colon = ":", // todo: fix bug with reading it
+            Colon = ":",
             Semicolon = ";",
             Comma = ",",
             Dot = ".",
@@ -110,10 +110,8 @@ namespace src.Tokenizer
             var fieldInfos = t.GetFields(BindingFlags.Public | BindingFlags.Static);
 
             // Go through the field list and only pick out the constants
-            foreach (var fi in fieldInfos)
-            {
-                if (fi.IsLiteral && !fi.IsInitOnly)
-                {
+            foreach (var fi in fieldInfos) {
+                if (fi.IsLiteral && !fi.IsInitOnly) {
                     terminals.Add((string) fi.GetValue(null));
                 }
             }

@@ -4,9 +4,8 @@ namespace src.Tokenizer
 {
     public class TokenStream
     {
-        private readonly HashSet<TokenType> _skipList = new HashSet<TokenType>()
-        {
-            TokenType.Comment, TokenType.NewLine
+        private readonly HashSet<TokenType> _skipList = new HashSet<TokenType>() {
+            TokenType.LineComment, TokenType.NewLine
         };
 
         private readonly Tokenizer _tokenizer;
@@ -29,17 +28,11 @@ namespace src.Tokenizer
             var pos = _position;
 
             Token res;
-            do
-            {
+            do {
                 res = GetToken(--pos);
-                if (res == null)
-                {
-                    break;
-                }
-            } while (InSkipList(res));
+            } while (res != null && InSkipList(res));
 
-            if (movePointer)
-            {
+            if (movePointer) {
                 _position = pos;
             }
 
@@ -56,17 +49,11 @@ namespace src.Tokenizer
             var pos = _position;
 
             Token res;
-            do
-            {
+            do {
                 res = GetToken(pos++);
-                if (res == null)
-                {
-                    break;
-                }
-            } while (InSkipList(res));
+            } while (res != null && InSkipList(res));
 
-            if (movePointer)
-            {
+            if (movePointer) {
                 _position = pos;
             }
 
@@ -90,8 +77,7 @@ namespace src.Tokenizer
 
         private Token GetToken(int pos)
         {
-            if (pos >= _tokenizer.Tokens.Count || pos < 0)
-            {
+            if (pos >= _tokenizer.Tokens.Count || pos < 0) {
                 return null;
             }
 
