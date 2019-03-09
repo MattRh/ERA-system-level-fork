@@ -48,6 +48,7 @@
         <Compile Include="Program.cs" />
         <Compile Include="Tokenizer\*" />
         <Compile Include="Parser\*" />
+        <Compile Include="Parser\Nodes\*" />
         <!--<Compile Include="Semantic\*" />
         <Compile Include="Generator\*" />-->
         <Compile Include="Exception\*" />
