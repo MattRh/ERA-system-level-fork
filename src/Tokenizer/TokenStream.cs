@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using src.Interfaces;
 
 namespace src.Tokenizer
 {
-    public class TokenStream
+    public class TokenStream : IDebuggable
     {
         private readonly HashSet<TokenType> _skipList = new HashSet<TokenType>() {
             TokenType.LineComment, TokenType.NewLine
@@ -87,6 +88,24 @@ namespace src.Tokenizer
         private bool InSkipList(Token token)
         {
             return _skipList.Contains(token.Type);
+        }
+
+        public string ToDebugString()
+        {
+            var currentIndex = _position;
+
+            var res = string.Empty;
+            Token next;
+            do {
+                next = Next();
+                if (next != null) {
+                    res += next.ToJsonString() + "\n";
+                }
+            } while (next != null);
+
+            _position = currentIndex;
+
+            return res.Trim();
         }
     }
 }

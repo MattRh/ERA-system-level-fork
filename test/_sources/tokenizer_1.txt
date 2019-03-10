@@ -1,0 +1,6 @@
+start routine int(): R30
+code
+    const a = 5;
+    codeb := 0;
+    //cst d = 5;
+end

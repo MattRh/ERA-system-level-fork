@@ -1,4 +1,5 @@
 using System;
+using src.Interfaces;
 using src.Parser;
 using src.Tokenizer;
 
@@ -78,34 +79,15 @@ namespace src.Utils
             printDebug("Generated assembly:\n" + asmCode);
         }*/
 
-        private static void PrintDebug(Tokenizer tokenizer)
+        private static void PrintDebug(IDebuggable o)
         {
-            foreach (var token in tokenizer.Tokens) {
-                PrintDebug(token.ToJsonString());
-            }
-
-            PrintDebug("");
-        }
-
-        private static void PrintDebug(TokenStream tokenStream)
-        {
-            Token next;
-            do {
-                next = tokenStream.Next();
-                if (next != null) {
-                    PrintDebug(next.ToJsonString());
-                }
-            } while (next != null);
-
-            tokenStream.Reset();
-
+            PrintDebug(o.GetType() + ":\n" + o.ToDebugString());
             PrintDebug("");
         }
 
         private static void PrintDebug(AstNode astTree)
         {
             PrintDebug("Parse tree:\n" + astTree);
-
             PrintDebug("");
         }
 

@@ -6,7 +6,7 @@ using src.Utils;
 
 namespace src.Tokenizer
 {
-    public class Tokenizer
+    public class Tokenizer : IDebuggable
     {
         private readonly Regex _numeric = new Regex("^((\\+|-)?\\d+)\\z");
         private readonly Regex _identifier = new Regex("^([A-Za-z_][A-Za-z0-9_]*)\\z");
@@ -170,6 +170,16 @@ namespace src.Tokenizer
             }
 
             return text;
+        }
+
+        public string ToDebugString()
+        {
+            var res = string.Empty;
+            foreach (var token in Tokens) {
+                res += token.ToJsonString() + "\n";
+            }
+
+            return res.Trim();
         }
     }
 }
