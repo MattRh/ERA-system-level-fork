@@ -1,7 +1,6 @@
-﻿using System;
-using src.Tokenizer;
+﻿using src.Tokenizer;
 
-namespace Erasystemlevel.Exception
+namespace src.Exceptions
 {
     public class SyntaxError : CompilationError
     {

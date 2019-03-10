@@ -1,7 +1,8 @@
 using System;
 using src.Tokenizer;
+using src.Utils;
 
-namespace Erasystemlevel.Exception
+namespace src.Exceptions
 {
     public class CompilationError : SystemException
     {

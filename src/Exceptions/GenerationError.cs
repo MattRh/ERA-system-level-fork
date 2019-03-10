@@ -1,6 +1,4 @@
-using System;
-
-namespace Erasystemlevel.Exception
+namespace src.Exceptions
 {
     public class GenerationError: CompilationError
     {

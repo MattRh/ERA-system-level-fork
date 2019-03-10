@@ -2,7 +2,7 @@ using System;
 using src.Parser;
 using src.Tokenizer;
 
-namespace Erasystemlevel
+namespace src.Utils
 {
     public class Compiler
     {
@@ -11,10 +11,10 @@ namespace Erasystemlevel
 
         public SourceCode SourceCode { get; private set; }
 
-        public Tokenizer Tokenizer { get; private set; }
+        public Tokenizer.Tokenizer Tokenizer { get; private set; }
         public TokenStream TokenStream { get; private set; }
 
-        public Parser Parser { get; private set; }
+        public Parser.Parser Parser { get; private set; }
         public AstNode AstTree { get; private set; }
 
         public Compiler(string filepath)
@@ -39,7 +39,7 @@ namespace Erasystemlevel
 
         private void Tokenize()
         {
-            Tokenizer = new Tokenizer(SourceCode);
+            Tokenizer = new Tokenizer.Tokenizer(SourceCode);
             Tokenizer.Process();
             //PrintDebug(Tokenizer);
 
@@ -49,7 +49,7 @@ namespace Erasystemlevel
 
         private void Parse()
         {
-            Parser = new Parser(TokenStream);
+            Parser = new Parser.Parser(TokenStream);
 
             AstTree = Parser.ParseUnit();
             PrintDebug(AstTree);

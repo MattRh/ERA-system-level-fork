@@ -3,7 +3,7 @@ using System.IO;
 using System.Security;
 using System.Text;
 
-namespace Erasystemlevel
+namespace src.Utils
 {
     public class SourceCode
     {
