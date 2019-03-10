@@ -8,30 +8,35 @@ namespace src.Exceptions
     {
         public SourceCode Source;
 
-        private readonly Token _token;
+        private readonly Position _position;
 
         public CompilationError(string message) : base(message)
         {
         }
 
-        public CompilationError(string message, Token token) : base(message)
+        public CompilationError(string message, Position position) : base(message)
         {
-            _token = token;
+            _position = position;
+        }
+
+        public CompilationError(string message, Token token) : this(message, token.Position)
+        {
         }
 
         public string Verbose()
         {
             var result = GetType().Name;
-            if (_token != null)
-            {
-                var line = _token.Position.Item1;
-                var symbol = _token.Position.Item2;
-                var length = _token.Value.Length;
+            if (_position != null) {
+                var start = _position.Start;
+                var end = _position.End;
+                
+                var line = end.Line;
+                var symbol = Math.Min(start.Symbol, end.Symbol);
+                var length = Math.Abs(end.Symbol - start.Symbol);
 
                 result += $" in {line}:{symbol}:";
 
-                if (Source != null)
-                {
+                if (Source != null) {
                     var codePart = Source.Highlight(line, symbol - length, length);
                     result += "\n\n" + codePart;
                 }

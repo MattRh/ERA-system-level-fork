@@ -25,7 +25,7 @@ namespace src.Parser
         {
             this.Token = token;
         }
-
+        
         public int NumericValue()
         {
             if (Type != NodeType.Literal) {

@@ -1,3 +1,6 @@
+using System;
+using src.Utils;
+
 namespace src.Tokenizer
 {
     public enum TokenType
@@ -16,13 +19,15 @@ namespace src.Tokenizer
     {
         public readonly TokenType Type;
         public readonly string Value;
-        public readonly (int, int) Position;
+        public readonly Position Position;
 
         public Token(TokenType type, string value, (int, int) position)
         {
             this.Type = type;
             this.Value = value;
-            this.Position = position;
+
+            var length = value?.Length ?? 0;
+            this.Position = new Position(position.Item1, position.Item2, length);
         }
 
         public bool IsKeyword(string name)
@@ -32,7 +37,7 @@ namespace src.Tokenizer
 
         public string ToJsonString()
         {
-            return $"{{type: {Type}, pos: {Position}, value: {Value}}}";
+            return $"{{type: {Type}, pos: {Position.Start}, value: {Value}}}";
         }
 
         public override string ToString() => Value;

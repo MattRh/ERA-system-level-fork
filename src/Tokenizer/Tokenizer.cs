@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using src.Exceptions;
 using src.Interfaces;
+using src.Parser;
+using src.Parser.Nodes;
 using src.Utils;
 
 namespace src.Tokenizer
