@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using src.Exceptions;
+using src.Parser.Nodes;
 using src.Tokenizer;
 
 namespace src.Parser
@@ -14,12 +15,12 @@ namespace src.Parser
             _stream = stream;
         }
 
-        public AstNode ParseUnit()
+        public AstNode ParseProgram()
         {
-            var node = new AstNode(NodeType.Unit);
+            var program = new ProgramRaw();
 
             while (_stream.HasTokens()) {
-                var nextNode = TryVariants(new Func<AstNode>[] {
+                var nextNode = TryExtractVariants(new Func<AstNode>[] {
                     ParseData,
                     ParseModule,
                     ParseRoutine,
@@ -27,42 +28,40 @@ namespace src.Parser
                 });
 
                 if (nextNode != null) {
-                    node.Children.Add(nextNode);
+                    program.AddChild(nextNode);
                 }
                 else {
                     var nextToken = _stream.Next();
-                    throw new SyntaxError($"Failed to parse unit. Invalid token `{nextToken}` encountered", nextToken);
+                    AssertTokenExist(nextToken);
+                    
+                    throw SyntaxError.Make(SyntaxErrorMessages.INVALID_TOKEN(nextToken), nextToken);
                 }
             }
 
-            return node;
+            return program;
         }
 
         private AstNode ParseCode()
         {
             var nextToken = _stream.Next();
-            if (!nextToken.IsKeyword("code")) return null;
+            if (!nextToken.IsKeyword(Keyword.Code)) return null;
 
-            var node = new AstNode(NodeType.Code);
+            var code = new Code();
             _stream.Fixate();
 
-            var children = AllChildren(new Func<AstNode>[] {
+            var children = ExtractAllChildren(new Func<AstNode>[] {
                 ParseVariable,
                 ParseConstant,
                 ParseStatment,
             });
-            node.Children.AddRange(children);
+            code.AddChildren(children);
 
             nextToken = _stream.Next();
-            if (nextToken == null) {
-                throw new SyntaxError("Unexpected end of stream");
-            }
 
-            if (!nextToken.IsKeyword("end")) {
-                throw new SyntaxError($"Unexpected token. Expected `end` by got `{nextToken}`", nextToken);
-            }
+            AssertTokenExist(nextToken);
+            AssertKeyword(Keyword.End, nextToken);
 
-            return node;
+            return code;
         }
 
         private AstNode ParseData()
@@ -100,7 +99,7 @@ namespace src.Parser
             return null;
         }
 
-        private AstNode TryVariants(IEnumerable<Func<AstNode>> variants)
+        private AstNode TryExtractVariants(IEnumerable<Func<AstNode>> variants)
         {
             foreach (var parse in variants) {
                 var res = parse();
@@ -116,19 +115,33 @@ namespace src.Parser
             return null;
         }
 
-        private IEnumerable<AstNode> AllChildren(IEnumerable<Func<AstNode>> extractors)
+        private IEnumerable<AstNode> ExtractAllChildren(IEnumerable<Func<AstNode>> extractors)
         {
             var found = new List<AstNode>();
 
             AstNode nextNode;
             do {
-                nextNode = TryVariants(extractors);
+                nextNode = TryExtractVariants(extractors);
                 if (nextNode != null) {
                     found.Add(nextNode);
                 }
             } while (nextNode != null);
 
             return found;
+        }
+
+        private static void AssertTokenExist(Token token)
+        {
+            if (token == null) {
+                throw SyntaxError.Make(SyntaxErrorMessages.UNEXPECTED_EOS());
+            }
+        }
+
+        private static void AssertKeyword(string expected, Token received)
+        {
+            if (!received.IsKeyword(expected)) {
+                throw SyntaxError.Make(SyntaxErrorMessages.UNEXPECTED_TOKEN(expected, received), received);
+            }
         }
     }
 }

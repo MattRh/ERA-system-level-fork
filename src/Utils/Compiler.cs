@@ -52,7 +52,7 @@ namespace src.Utils
         {
             Parser = new Parser.Parser(TokenStream);
 
-            AstTree = Parser.ParseUnit();
+            AstTree = Parser.ParseProgram();
             PrintDebug(AstTree);
         }
 

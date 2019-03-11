@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using src.Tokenizer;
+using src.Utils;
 
 namespace src.Parser
 {
-    public class AstNode
+    /*public class AstNode
     {
         public readonly NodeType Type;
         public readonly string Value;
@@ -49,6 +50,60 @@ namespace src.Parser
             var childrenJson = "";
             foreach (var i in Children) {
                 var childrenList = i.ToString().Split('\n');
+                var formattedChildren = childrenList.Aggregate("", (current, j) => $"{current} {j}\n");
+
+                childrenJson = childrenJson + formattedChildren;
+            }
+
+            var currentJson = currentName;
+            if (childrenJson.Length > 0) {
+                currentJson += ": {\n" + childrenJson + "}";
+            }
+
+            return currentJson;
+        }
+    }*/
+
+    public class AstNode
+    {
+        public readonly string Value;
+        public readonly Position Position;
+
+        public readonly List<AstNode> Children = new List<AstNode>();
+
+        public AstNode(string value = null)
+        {
+            this.Value = value;
+        }
+
+        public AstNode(Token token)
+        {
+            this.Value = token.Value;
+            this.Position = token.Position;
+        }
+
+        public void AddChild(AstNode node)
+        {
+            Children.Add(node);
+        }
+
+        public void AddChildren(IEnumerable<AstNode> nodes)
+        {
+            foreach (var node in nodes) {
+                AddChild(node);
+            }
+        }
+
+        public string ToDebugString()
+        {
+            var currentName = GetType().ToString();
+            if (!string.IsNullOrEmpty(Value) && !currentName.Equals(Value)) {
+                currentName += "(" + Value + ")";
+            }
+
+            var childrenJson = "";
+            foreach (var i in Children) {
+                var childrenList = i.ToDebugString().Split('\n');
                 var formattedChildren = childrenList.Aggregate("", (current, j) => $"{current} {j}\n");
 
                 childrenJson = childrenJson + formattedChildren;
