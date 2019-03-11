@@ -5,7 +5,7 @@ using src.Utils;
 
 namespace test.TestSuites
 {
-    public abstract class Suite
+    public abstract class BaseSuite
     {
         protected string Filename;
         protected SourceCode Source;
@@ -27,7 +27,7 @@ namespace test.TestSuites
         {
             var contents = File.ReadAllText(path);
             contents = contents.Replace("\r\n", "\n").Replace("\r", "\n");
-            
+
             return contents;
         }
 

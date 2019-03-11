@@ -4,7 +4,7 @@ using src.Tokenizer;
 
 namespace test.TestSuites
 {
-    public class TokenizerTest: Suite
+    public class TokenizerTest: BaseSuite
     {
         [Test]
         public void TokenizationTestCase() {

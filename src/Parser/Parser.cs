@@ -6,13 +6,10 @@ using src.Tokenizer;
 
 namespace src.Parser
 {
-    public class Parser
+    public class Parser : BaseParser
     {
-        private readonly TokenStream _stream;
-
-        public Parser(TokenStream stream)
+        public Parser(TokenStream stream) : base(stream)
         {
-            _stream = stream;
         }
 
         public AstNode ParseProgram()
@@ -33,7 +30,7 @@ namespace src.Parser
                 else {
                     var nextToken = _stream.Next();
                     AssertTokenExist(nextToken);
-                    
+
                     throw SyntaxError.Make(SyntaxErrorMessages.INVALID_TOKEN(nextToken), nextToken);
                 }
             }
@@ -98,8 +95,18 @@ namespace src.Parser
         {
             return null;
         }
+    }
 
-        private AstNode TryExtractVariants(IEnumerable<Func<AstNode>> variants)
+    public class BaseParser
+    {
+        protected readonly TokenStream _stream;
+
+        public BaseParser(TokenStream stream)
+        {
+            _stream = stream;
+        }
+
+        protected AstNode TryExtractVariants(IEnumerable<Func<AstNode>> variants)
         {
             foreach (var parse in variants) {
                 var res = parse();
@@ -115,7 +122,7 @@ namespace src.Parser
             return null;
         }
 
-        private IEnumerable<AstNode> ExtractAllChildren(IEnumerable<Func<AstNode>> extractors)
+        protected IEnumerable<AstNode> ExtractAllChildren(IEnumerable<Func<AstNode>> extractors)
         {
             var found = new List<AstNode>();
 
@@ -130,14 +137,14 @@ namespace src.Parser
             return found;
         }
 
-        private static void AssertTokenExist(Token token)
+        protected static void AssertTokenExist(Token token)
         {
             if (token == null) {
                 throw SyntaxError.Make(SyntaxErrorMessages.UNEXPECTED_EOS());
             }
         }
 
-        private static void AssertKeyword(string expected, Token received)
+        protected static void AssertKeyword(string expected, Token received)
         {
             if (!received.IsKeyword(expected)) {
                 throw SyntaxError.Make(SyntaxErrorMessages.UNEXPECTED_TOKEN(expected, received), received);
