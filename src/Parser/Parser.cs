@@ -167,7 +167,7 @@ namespace src.Parser
         {
             var t = NextToken();
             AssetIdentifier(t);
-            
+
             var node = new Identifier(t);
 
             return node;
@@ -187,7 +187,7 @@ namespace src.Parser
         {
             var t = _stream.Next(movePointer);
             AssertTokenExist(t);
-            
+
             if (fixate) {
                 _stream.Fixate();
             }
@@ -250,7 +250,7 @@ namespace src.Parser
                 start.Item2 += 1;
                 end.Item2 += 1;
                 var prettyPos = new Position(start, end);
-                
+
                 throw SyntaxError.Make(SyntaxErrorMessages.UNEXPECTED_EOS(), prettyPos);
             }
         }
