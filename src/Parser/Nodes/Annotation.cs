@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using src.Tokenizer;
 
 namespace src.Parser.Nodes
@@ -11,5 +12,12 @@ namespace src.Parser.Nodes
 
     public class PragmaDeclaration : AstNode
     {
+    }
+
+    public class PragmaText : AstNode
+    {
+        public PragmaText(string value = null) : base(value)
+        {
+        }
     }
 }

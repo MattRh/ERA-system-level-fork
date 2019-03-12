@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using src.Interfaces;
 using src.Tokenizer;
 using src.Utils;
 
@@ -64,7 +65,7 @@ namespace src.Parser
         }
     }*/
 
-    public abstract class AstNode
+    public abstract class AstNode: IDebuggable
     {
         public readonly string Value;
         public Position Position { get; private set; }
@@ -84,6 +85,10 @@ namespace src.Parser
 
         public void AddChild(AstNode node)
         {
+            if (node == null) {
+                throw new ArgumentNullException();
+            }
+            
             Children.Add(node);
 
             if (node.Position != null) {
@@ -111,6 +116,11 @@ namespace src.Parser
 
         public void PropagatePosition(Position p)
         {
+            if (Position == null) {
+                Position = p;
+                return;
+            }
+
             Position = new Position(Position.Start, p.End);
         }
 
@@ -121,7 +131,7 @@ namespace src.Parser
 
         public string ToDebugString()
         {
-            var currentName = GetType().ToString();
+            var currentName = GetType().Name;
             if (!string.IsNullOrEmpty(Value) && !currentName.Equals(Value)) {
                 currentName += "(" + Value + ")";
             }
@@ -129,7 +139,7 @@ namespace src.Parser
             var childrenJson = "";
             foreach (var i in Children) {
                 var childrenList = i.ToDebugString().Split('\n');
-                var formattedChildren = childrenList.Aggregate("", (current, j) => $"{current} {j}\n");
+                var formattedChildren = childrenList.Aggregate("", (current, j) => $"{current}  {j}\n");
 
                 childrenJson = childrenJson + formattedChildren;
             }

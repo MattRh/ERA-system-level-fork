@@ -53,7 +53,7 @@ namespace src.Utils
             Parser = new Parser.Parser(TokenStream);
 
             AstTree = Parser.ParseProgram();
-            PrintDebug(AstTree);
+            PrintDebug(AstTree, "Parse tree");
         }
 
         /*private void Analyze()
@@ -78,16 +78,14 @@ namespace src.Utils
             var asmCode = codeGen.assembly.ToString();
             printDebug("Generated assembly:\n" + asmCode);
         }*/
-
-        private static void PrintDebug(IDebuggable o)
+        
+        private static void PrintDebug(IDebuggable o, string info = null)
         {
-            PrintDebug(o.GetType() + ":\n" + o.ToDebugString());
-            PrintDebug("");
-        }
-
-        private static void PrintDebug(AstNode astTree)
-        {
-            PrintDebug("Parse tree:\n" + astTree);
+            if (info == null) {
+                info = o.GetType().ToString();
+            }
+            
+            PrintDebug( info + ":\n" + o.ToDebugString());
             PrintDebug("");
         }
 

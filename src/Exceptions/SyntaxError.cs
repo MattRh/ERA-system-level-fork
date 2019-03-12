@@ -1,5 +1,6 @@
 ﻿using System;
 using src.Tokenizer;
+using src.Utils;
 
 namespace src.Exceptions
 {
@@ -13,11 +14,21 @@ namespace src.Exceptions
         {
         }
 
-        public static SyntaxError Make(string message, Token token = null)
+        public SyntaxError(string message, Position position) : base(message, position)
         {
-            var callee = GetCallee();
+        }
 
-            return new SyntaxError($"{callee.Name} failed: {message}", token);
+        public static SyntaxError Make(string message, Position position = null)
+        {
+            var callee = GetCallee("parse");
+            var text = $"{callee.Name} failed: {message}";
+
+            return position == null ? new SyntaxError(text) : new SyntaxError(text, position);
+        }
+
+        public static SyntaxError Make(string message, Token token)
+        {
+            return token == null ? Make(message) : Make(message, token.Position);
         }
 
         public static SyntaxError Make(Func<string> message)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using src.Interfaces;
 
@@ -61,6 +62,18 @@ namespace src.Tokenizer
             return res;
         }
 
+        public Token Last()
+        {
+            var pos = _tokenizer.Tokens.Count;
+
+            Token res;
+            do {
+                res = GetToken(pos--);
+            } while (res == null || InSkipList(res));
+
+            return res;
+        }
+
         public bool HasTokens()
         {
             return Next(false) != null;
@@ -88,6 +101,16 @@ namespace src.Tokenizer
         private bool InSkipList(Token token)
         {
             return _skipList.Contains(token.Type);
+        }
+
+        public void DisableNewLineIgnore()
+        {
+            _skipList.Remove(TokenType.NewLine);
+        }
+
+        public void EnableNewLineIgnore()
+        {
+            _skipList.Add(TokenType.NewLine);
         }
 
         public string ToDebugString()

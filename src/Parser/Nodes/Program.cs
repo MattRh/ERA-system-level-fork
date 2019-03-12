@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using src.Exceptions;
+using src.Interfaces;
 using src.Tokenizer;
 
 namespace src.Parser.Nodes

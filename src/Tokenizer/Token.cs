@@ -39,10 +39,15 @@ namespace src.Tokenizer
         {
             return Type == TokenType.Delimiter && Value == name;
         }
-        
+
         public bool IsOperator(string name)
         {
             return Type == TokenType.Operator && Value == name;
+        }
+
+        public bool IsNewLine()
+        {
+            return Type == TokenType.NewLine;
         }
 
         public string ToJsonString()

@@ -1,4 +1,4 @@
-pragma ADF();
+pragma ADF(R30, load), AGF()
 
 //routine ender(): R30 do
 //end

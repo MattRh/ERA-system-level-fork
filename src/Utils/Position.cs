@@ -43,5 +43,10 @@ namespace src.Utils
         {
             return $"({Line}, {Symbol})";
         }
+
+        public (int, int) ToTuple()
+        {
+            return (Line, Symbol);
+        }
     }
 }

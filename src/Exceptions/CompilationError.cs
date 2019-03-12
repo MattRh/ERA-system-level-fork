@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Reflection;
 using src.Tokenizer;
 using src.Utils;
@@ -25,12 +26,24 @@ namespace src.Exceptions
         {
         }
 
-        protected static MethodBase GetCallee()
+        protected static MethodBase GetCallee(string prefix = null)
         {
             var stackTrace = new StackTrace();
-            var callee = stackTrace.GetFrame(2).GetMethod();
 
-            return callee;
+            if (prefix == null) {
+                return stackTrace.GetFrame(2).GetMethod();
+            }
+
+            foreach (var frame in stackTrace.GetFrames()) {
+                var method = frame.GetMethod();
+                var name = method.Name.ToLower();
+
+                if (name.StartsWith(prefix)) {
+                    return method;
+                }
+            }
+
+            return null;
         }
 
         public string Verbose()
