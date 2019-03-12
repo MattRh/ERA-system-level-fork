@@ -1,3 +1,4 @@
+
 namespace src.Utils
 {
     public class Position
@@ -13,6 +14,12 @@ namespace src.Utils
 
         public Position(int line, int symbol, int length) : this((line, symbol), (line, symbol + length))
         {
+        }
+
+        public Position(Point start, Point end)
+        {
+            this.Start = start;
+            this.End = end;
         }
 
         public override string ToString()

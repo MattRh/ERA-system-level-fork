@@ -64,10 +64,10 @@ namespace src.Parser
         }
     }*/
 
-    public class AstNode
+    public abstract class AstNode
     {
         public readonly string Value;
-        public readonly Position Position;
+        public Position Position { get; private set; }
 
         public readonly List<AstNode> Children = new List<AstNode>();
 
@@ -85,6 +85,10 @@ namespace src.Parser
         public void AddChild(AstNode node)
         {
             Children.Add(node);
+
+            if (node.Position != null) {
+                PropagatePosition(node.Position);
+            }
         }
 
         public void AddChildren(IEnumerable<AstNode> nodes)
@@ -92,6 +96,27 @@ namespace src.Parser
             foreach (var node in nodes) {
                 AddChild(node);
             }
+        }
+
+        public virtual void ParseChild(AstNode node)
+        {
+        }
+
+        public void ParseChildren()
+        {
+            foreach (var child in Children) {
+                ParseChild(child);
+            }
+        }
+
+        public void PropagatePosition(Position p)
+        {
+            Position = new Position(Position.Start, p.End);
+        }
+
+        public void PropagatePosition(Token t)
+        {
+            PropagatePosition(t.Position);
         }
 
         public string ToDebugString()

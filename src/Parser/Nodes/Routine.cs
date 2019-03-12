@@ -1,6 +1,6 @@
 namespace src.Parser.Nodes
 {
-    public class Routine
+    public class Routine: AstNode
     {
         
     }

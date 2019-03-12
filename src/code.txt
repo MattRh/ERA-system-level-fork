@@ -1,9 +1,11 @@
-routine ender(): R30 do
-end
+pragma ADF();
 
-code
-    const a = 5;
-    int codeb = 3;
-    codeb := 0;
-    //cst d = 5;
-end
+//routine ender(): R30 do
+//end
+
+//code
+//    const a = 5;
+//    int codeb = 3;
+//    codeb := 0;
+//    //cst d = 5;
+//end

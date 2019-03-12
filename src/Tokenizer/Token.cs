@@ -35,6 +35,16 @@ namespace src.Tokenizer
             return Type == TokenType.Keyword && Value == name;
         }
 
+        public bool IsDelimiter(string name)
+        {
+            return Type == TokenType.Delimiter && Value == name;
+        }
+        
+        public bool IsOperator(string name)
+        {
+            return Type == TokenType.Operator && Value == name;
+        }
+
         public string ToJsonString()
         {
             return $"{{type: {Type}, pos: {Position.Start}, value: {Value}}}";
