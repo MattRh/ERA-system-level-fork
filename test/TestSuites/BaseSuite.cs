@@ -10,9 +10,14 @@ namespace test.TestSuites
         protected string Filename;
         protected SourceCode Source;
 
-        protected void AssertResult(string result)
+        protected void AssertResult(string result, bool trim = true)
         {
-            var desiredResult = ReadFile(ResultFilePath(Filename));
+            var desiredResult = ReadFile(ResultFilePath(Filename)).Trim();
+
+            if (trim) {
+                result = result.Trim();
+                desiredResult = desiredResult.Trim();
+            }
 
             Assert.AreEqual(desiredResult, result);
         }

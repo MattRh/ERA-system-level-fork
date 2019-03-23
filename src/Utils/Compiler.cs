@@ -23,6 +23,11 @@ namespace src.Utils
             Read(filepath);
         }
 
+        public Compiler(SourceCode source)
+        {
+            SourceCode = source;
+        }
+
         public string Compile()
         {
             Tokenize();
@@ -38,8 +43,10 @@ namespace src.Utils
             SourceCode = new SourceCode(path);
         }
 
-        private void Tokenize()
+        public void Tokenize()
         {
+            Contract.Requires(SourceCode != null);
+
             Tokenizer = new Tokenizer.Tokenizer(SourceCode);
             Tokenizer.Process();
             //PrintDebug(Tokenizer);
@@ -48,15 +55,18 @@ namespace src.Utils
             //PrintDebug(TokenStream);
         }
 
-        private void Parse()
+        public void Parse()
         {
+            Contract.Requires(Tokenizer != null);
+            Contract.Requires(TokenStream != null);
+
             Parser = new Parser.Parser(TokenStream);
 
             AstTree = Parser.ParseProgram();
             PrintDebug(AstTree, "Parse tree");
         }
 
-        /*private void Analyze()
+        /*public void Analyze()
         {
             var semantic = new SemanticAnalyzer(astTree);
             semantic.analyze();
@@ -70,7 +80,7 @@ namespace src.Utils
             //printDebug("Semantic tree:\n" + tree + "\n");
         }*/
 
-        /*private void Generate()
+        /*public void Generate()
         {
             var codeGen = new CodeGenerator(aTree, semantic.moduleTable, semantic.dataTable);
             codeGen.generate();
@@ -78,14 +88,14 @@ namespace src.Utils
             var asmCode = codeGen.assembly.ToString();
             printDebug("Generated assembly:\n" + asmCode);
         }*/
-        
-        private static void PrintDebug(IDebuggable o, string info = null)
+
+        private static void PrintDebug(IDebuggable o, string description = null)
         {
-            if (info == null) {
-                info = o.GetType().ToString();
+            if (description == null) {
+                description = o.GetType().ToString();
             }
-            
-            PrintDebug( info + ":\n" + o.ToDebugString());
+
+            PrintDebug(description + ":\n" + o.ToDebugString());
             PrintDebug("");
         }
 

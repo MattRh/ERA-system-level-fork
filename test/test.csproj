@@ -46,8 +46,8 @@
         <Compile Include="TestSuites\*" />
     </ItemGroup>
     <ItemGroup>
-      <None Include="_results\*" CopyToOutputDirectory="PreserveNewest" />
-      <None Include="_sources\*" CopyToOutputDirectory="PreserveNewest" />
+      <None Include="_results\*" CopyToOutputDirectory="Always" />
+      <None Include="_sources\*" CopyToOutputDirectory="Always" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\src\src.csproj">

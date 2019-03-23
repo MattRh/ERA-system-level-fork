@@ -1,4 +1,7 @@
-﻿using System;
+﻿#define DEBUG
+#define CONTRACTS
+
+using System;
 using src.Exceptions;
 using src.Utils;
 
