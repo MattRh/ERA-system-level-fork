@@ -136,6 +136,7 @@ Language supports only one-line comments that starts with `//`
 [ ] Add operations on array: 'sizeof(\_)' and negative indexes usage  
 [ ] Add array and struct default initializer: via '{\_, \_, ..}' construction assignment  
 [ ] Add custom structs support: requires grammar change   
+[ ] Add loops with post conditions (i.e. do .. while)
 
 ### FP: changes for structs support
 

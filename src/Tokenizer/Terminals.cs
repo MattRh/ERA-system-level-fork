@@ -34,7 +34,7 @@ namespace src.Tokenizer
             Ampersand = "&", // and || deref
             Line = "|", // or
             Hat = "^", // xor
-            Question = "?", // todo: what is that?
+            //Question = "?", // todo: what is that?
             //
             Equal = "=",
             Less = "<",
@@ -51,7 +51,7 @@ namespace src.Tokenizer
             AssignXor = "^=",
             AssignLess = "<=",
             AssignGreater = ">=",
-            AssignCond = "?=", // todo: what is that?
+            AssignCond = "?=",
             AssignSwap = "<=>";
     }
 
