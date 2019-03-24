@@ -20,6 +20,11 @@ namespace src.Parser
             this.Value = value;
         }
 
+        public AstNode(Position position)
+        {
+            this.Position = position;
+        }
+
         public AstNode(Token token)
         {
             this.Value = token.Value;

@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
 using src.Exceptions;
 using src.Parser.Nodes;
 using src.Tokenizer;
@@ -311,9 +314,12 @@ namespace src.Parser
                 node.AddChild(node);
             }
 
-            var inner = ParseAssemblyBlock();
+            AstNode inner = ParseAssemblyBlock();
             if (inner == null) {
                 inner = ParseExtensionStatement();
+            }
+            if (label == null && inner == null) {
+                return null;
             }
 
             node.AddChild(inner);
@@ -371,17 +377,157 @@ namespace src.Parser
             return null;
         }
 
-        private AstNode ParseAssemblyBlock()
+        private AssemblyBlock ParseAssemblyBlock()
         {
-            return null;
+            var node = (AssemblyBlock) TryReadNode(Keyword.Asm, typeof(AssemblyBlock));
+            if (node == null) {
+                return null;
+            }
+
+            var statement = ParseAssemblyStatement();
+            node.AddChild(statement);
+
+            if (NextToken(false).IsDelimiter(Delimiter.Semicolon)) {
+                _stream.Next();
+
+                return node; // End of inline block
+            }
+
+            while (NextToken().IsDelimiter(Delimiter.Comma)) {
+                statement = ParseAssemblyStatement();
+
+                node.AddChild(statement);
+            }
+            _stream.Previous(); // Not comma encountered
+
+            ValidateBlockEnd(node);
+
+            return node;
         }
 
-        private AstNode ParseAssemblyStatement()
+        private AssemblyStatement ParseAssemblyStatement()
         {
-            return null;
+            AssemblyStatement node;
+
+            node = ParseAssemblyMetaOperation();
+            if (node != null) {
+                return node;
+            }
+
+            node = ParseAssemblyCondition();
+            if (node != null) {
+                return node;
+            }
+
+            var format = ParseAssemblyOperationFormat();
+
+            node = ParseAssemblyOperation();
+            if (format != null) {
+                node.AddChild(format);
+            }
+
+            return node;
+        }
+
+        private AssemblyMetaOperation ParseAssemblyMetaOperation()
+        {
+            var node = (AssemblyMetaOperation) TryReadNode(Keyword.Skip, typeof(AssemblyMetaOperation));
+            if (node != null) {
+                node = (AssemblyMetaOperation) TryReadNode(Keyword.Stop, typeof(AssemblyMetaOperation));
+            }
+
+            return node;
+        }
+
+        private AssemblyCondition ParseAssemblyCondition()
+        {
+            var node = (AssemblyCondition) TryReadNode(Keyword.If, typeof(AssemblyCondition));
+            if (node == null) {
+                return null;
+            }
+
+            var reg = ParseRegister();
+            node.AddChild(reg);
+
+            var t = NextToken();
+            AssertKeyword(Keyword.Goto, t);
+
+            node.PropagatePosition(t);
+
+            var expr = ParseExpression();
+            if (expr != null) {
+                node.AddChild(expr);
+            }
+            else {
+                reg = ParseRegister();
+                node.AddChild(reg);
+            }
+
+            return node;
+        }
+
+        private AssemblyOperationFormat ParseAssemblyOperationFormat()
+        {
+            var kw = NextToken();
+            if (!kw.IsKeyword(Keyword.Format)) {
+                _stream.Previous();
+
+                return null;
+            }
+
+            var allowedVals = new HashSet<string>() {"8", "16", "32"};
+
+            var t = NextToken();
+            AssertLiteral(t);
+            if (!allowedVals.Contains(t.Value)) {
+                throw SyntaxError.Make(SyntaxErrorMessages.INVALID_TOKEN, t);
+            }
+
+            var node = new AssemblyOperationFormat(t);
+            node.PropagatePosition(kw.Position);
+
+            return node;
+        }
+
+        private AssemblyOperation ParseAssemblyOperation()
+        {
+            // todo: support for dereference
+
+            var reg = ParseRegister();
+
+            var allowedOps = new HashSet<string>() {
+                Operator.Assign,
+                Operator.AssignPlus,
+                Operator.AssignMinus,
+                Operator.AssignShiftRight,
+                Operator.AssignShiftLeft,
+                Operator.AssignOr,
+                Operator.AssignAnd,
+                Operator.AssignXor,
+                Operator.AssignLess,
+                Operator.AssignGreater,
+                Operator.AssignCond
+            };
+            var op = NextToken();
+            if (op.Type != TokenType.Operator || !allowedOps.Contains(op.Value)) {
+                throw SyntaxError.Make(SyntaxErrorMessages.INVALID_TOKEN, op);
+            }
+
+            var node = new AssemblyOperation(op);
+            node.AddChild(reg);
+
+            reg = ParseRegister();
+            node.AddChild(reg);
+
+            return node;
         }
 
         private AstNode ParseExtensionStatement()
+        {
+            return null;
+        }
+
+        private AstNode ParseExpression()
         {
             return null;
         }

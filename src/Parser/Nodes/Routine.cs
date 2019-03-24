@@ -4,7 +4,7 @@ namespace src.Parser.Nodes
 {
     public class Routine : AstNode
     {
-        public Routine(Token t) : base(t)
+        public Routine(Token t) : base(t.Position)
         {
         }
     }

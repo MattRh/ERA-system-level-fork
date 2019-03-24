@@ -79,6 +79,7 @@ namespace src.Tokenizer
             Short = "short",
             Byte = "byte",
             //
+            Asm = "asm",
             Format = "format",
             Skip = "skip",
             Stop = "stop",

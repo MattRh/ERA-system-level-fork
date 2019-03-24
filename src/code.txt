@@ -4,7 +4,11 @@
 //module TestModule
 //end
 
-start routine ender: R30 do
+//start routine ender: R30 do
+//end
+
+routine asem do
+    asm R20 := R10;
 end
 
 //code

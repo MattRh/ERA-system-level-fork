@@ -5,7 +5,7 @@ namespace src.Parser.Nodes
 {
     public class Annotation : AstNode
     {
-        public Annotation(Token t) : base(t)
+        public Annotation(Token t) : base(t.Position)
         {
         }
     }
