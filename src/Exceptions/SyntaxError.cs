@@ -68,5 +68,10 @@ namespace src.Exceptions
         {
             return $"Unexpected token. Expected identifier but got `{received}`";
         }
+        
+        public static string LITERAL_EXPECTED(Token received)
+        {
+            return $"Unexpected token. Expected numeric literal but got `{received}`";
+        }
     }
 }

@@ -1,4 +1,5 @@
-pragma RegSave(R20);
+//pragma RegSave(R20);
+//data LInE_3 2343, end
 
 //routine ender(): R30 do
 //end

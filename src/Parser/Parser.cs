@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text;
 using src.Exceptions;
 using src.Parser.Nodes;
@@ -66,9 +67,6 @@ namespace src.Parser
             var node = new PragmaDeclaration();
 
             var id = ParseIdentifier();
-            if (id == null) {
-                throw SyntaxError.Make(SyntaxErrorMessages.IDENTIFIER_EXPECTED, NextToken());
-            }
             node.AddChild(id);
 
             AssertDelimiter(Delimiter.ParenthesisOpen, NextToken());
@@ -109,8 +107,8 @@ namespace src.Parser
 
         private AstNode ParseCode()
         {
-            var code = (Code) TryReadNode(Keyword.Code, typeof(Code));
-            if (code == null) {
+            var node = (Code) TryReadNode(Keyword.Code, typeof(Code));
+            if (node == null) {
                 return null;
             }
 
@@ -118,19 +116,41 @@ namespace src.Parser
                 ParseVarDeclaration,
                 ParseStatment,
             });
-            code.AddChildren(children);
+            node.AddChildren(children);
 
             var t = NextToken();
             AssertKeyword(Keyword.End, t);
 
-            code.PropagatePosition(t);
+            node.PropagatePosition(t);
 
-            return code;
+            return node;
         }
 
         private AstNode ParseData()
         {
-            return null;
+            var node = (Data) TryReadNode(Keyword.Data, typeof(Data));
+            if (node == null) {
+                return null;
+            }
+
+            var id = ParseIdentifier();
+            node.AddChild(id);
+
+            var next = ParseLiteral(false);
+            if (next != null) {
+                node.AddChild(next);
+            }
+            
+            while (NextToken().IsDelimiter(Delimiter.Comma)) {
+                next = ParseLiteral();
+                node.AddChild(next);
+            } 
+            _stream.Previous(); // Not comma encountered
+
+            var t = NextToken();
+            AssertKeyword(Keyword.End, t);
+
+            return node;
         }
 
         private AstNode ParseModule()
@@ -163,10 +183,42 @@ namespace src.Parser
             return null;
         }
 
-        private Identifier ParseIdentifier()
+        private Literal ParseLiteral(bool assert = true)
         {
             var t = NextToken();
-            AssetIdentifier(t);
+
+            try {
+                AssertLiteral(t);
+            }
+            catch (SyntaxError) {
+                if (assert) {
+                    throw;
+                }
+
+                _stream.Previous();
+                return null;
+            }
+
+            var node = new Literal(t);
+
+            return node;
+        }
+
+        private Identifier ParseIdentifier(bool assert = true)
+        {
+            var t = NextToken();
+
+            try {
+                AssetIdentifier(t);
+            }
+            catch (SyntaxError) {
+                if (assert) {
+                    throw;
+                }
+
+                _stream.Previous();
+                return null;
+            }
 
             var node = new Identifier(t);
 
@@ -280,6 +332,13 @@ namespace src.Parser
         {
             if (received.Type != TokenType.Identifier) {
                 throw SyntaxError.Make(SyntaxErrorMessages.IDENTIFIER_EXPECTED, received);
+            }
+        }
+
+        protected void AssertLiteral(Token received)
+        {
+            if (received.Type != TokenType.Number) {
+                throw SyntaxError.Make(SyntaxErrorMessages.LITERAL_EXPECTED, received);
             }
         }
     }

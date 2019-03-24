@@ -34,7 +34,7 @@ namespace src.Tokenizer
             Ampersand = "&", // and || deref
             Line = "|", // or
             Hat = "^", // xor
-            //Question = "?", // todo: what is that?
+            //Question = "?", // no docs for that symbol currently
             //
             Equal = "=",
             Less = "<",

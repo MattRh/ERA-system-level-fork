@@ -8,7 +8,18 @@ namespace test.TestSuites
         [Test]
         public void AnnotationsTestCase()
         {
-            LoadSourceFile("parser_1");
+            RunTest("parser_1");
+        }
+
+        [Test]
+        public void DataTestCase()
+        {
+            RunTest("parser_2");
+        }
+
+        public void RunTest(string name)
+        {
+            LoadSourceFile(name);
 
             var compiler = new Compiler(Source);
             compiler.Tokenize();

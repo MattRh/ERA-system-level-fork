@@ -9,7 +9,7 @@ namespace src.Exceptions
 {
     public class CompilationError : SystemException
     {
-        public SourceCode Source;
+        public new SourceCode Source;
 
         private readonly Position _position;
 
