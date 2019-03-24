@@ -74,16 +74,16 @@ namespace src.Utils
             return _fullText;
         }
 
-        public string Line(int number)
+        public string FetchLine(int number, string defaultLine = "")
         {
             var lines = _fullText.Split('\n');
 
-            return lines.Length <= number ? "" : lines[number];
+            return number >= lines.Length || number < 0 ? defaultLine : lines[number];
         }
 
         public string Highlight(int line, int? symbol, int? length)
         {
-            var res = Line(line);
+            var res = FetchLine(line);
             if (symbol != null) {
                 res += "\n" + MakeHighlight((int) symbol, length);
             }

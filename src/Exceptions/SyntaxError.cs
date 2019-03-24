@@ -80,6 +80,11 @@ namespace src.Exceptions
         {
             return $"Unexpected token. Expected register but got `{received}`";
         }
+        
+        public static string TYPE_EXPECTED(Token received)
+        {
+            return $"Unexpected token. Expected variable type but got `{received}`";
+        }
 
         public static string INVALID_ASM_DEREFERENCE_USE()
         {

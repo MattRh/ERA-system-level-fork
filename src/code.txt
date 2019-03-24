@@ -11,6 +11,10 @@
     //asm R20 := *R10, if R2 goto R20 end
 //end
 
+code
+    int a, b;
+end
+
 //code
 //    const a = 5;
 //    int codeb = 3;

@@ -57,10 +57,23 @@ namespace src.Exceptions
                 var symbol = Math.Min(start.Symbol, end.Symbol);
                 var length = Math.Abs(end.Symbol - start.Symbol);
 
-                result += $" in {line}:{symbol}:";
+                result += $" at {line + 1}:{symbol + 1}:{length}:";
 
                 if (Source != null) {
-                    var codePart = Source.Highlight(line, symbol, length);
+                    var prevLine = Source.FetchLine(line - 1, null);
+                    var errorPart = Source.Highlight(line, symbol, length);
+                    var nextLine = Source.FetchLine(line + 1, null);
+
+                    var codePart = "*----------------------------*\n";
+                    if (prevLine != null) {
+                        codePart += prevLine + "\n";
+                    }
+                    codePart += errorPart;
+                    if (nextLine != null) {
+                        codePart += "\n" + nextLine;
+                    }
+                    codePart += "\n*----------------------------*";
+                    
                     result += "\n\n" + codePart;
                 }
             }

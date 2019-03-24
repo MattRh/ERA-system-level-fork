@@ -4,7 +4,6 @@ using System.Text;
 using src.Exceptions;
 using src.Parser.Nodes;
 using src.Tokenizer;
-using src.Utils;
 
 namespace src.Parser
 {
@@ -242,7 +241,7 @@ namespace src.Parser
             t = NextToken();
             AssertDelimiter(Delimiter.ParenthesisClose, t);
 
-            return null;
+            return node;
         }
 
         private Parameter ParseParameter()
@@ -345,34 +344,130 @@ namespace src.Parser
             return node;
         }
 
-        private AstNode ParseVarDeclaration()
+        private VarDeclaration ParseVarDeclaration()
         {
-            return null;
+            AstNode child = ParseConstant();
+            if (child == null) {
+                child = ParseVariable();
+            }
+            if (child == null) {
+                return null;
+            }
+
+            var node = new VarDeclaration();
+            node.AddChild(child);
+
+            return node;
         }
 
-        private AstNode ParseVariable()
+        private Variable ParseVariable()
         {
-            return null;
+            var type = ParseType(false);
+            if (type == null) {
+                return null;
+            }
+
+            var node = new Variable();
+            node.AddChild(type);
+
+            do {
+                var definition = ParseVarDefinition();
+
+                node.AddChild(definition);
+            } while (NextToken().IsDelimiter(Delimiter.Comma));
+            _stream.Previous(); // Not comma encountered
+
+            var t = NextToken();
+            AssertDelimiter(Delimiter.Semicolon, t);
+
+            return node;
         }
 
-        private AstNode ParseType()
+        private VarType ParseType(bool assert = true)
         {
-            return null;
+            var t = NextToken();
+
+            var allowedTypes = new HashSet<string>() {Keyword.Int, Keyword.Short, Keyword.Byte};
+
+            if (t.Type != TokenType.Keyword || !allowedTypes.Contains(t.Value)) {
+                _stream.Previous();
+                
+                if (assert) {
+                    throw SyntaxError.Make(SyntaxErrorMessages.TYPE_EXPECTED, t);
+                }
+
+                return null;
+            }
+
+            var node = new VarType(t);
+
+            return node;
         }
 
-        private AstNode ParseVarDefinition()
+        private VarDefinition ParseVarDefinition()
         {
-            return null;
+            var id = ParseIdentifier();
+
+            var node = new VarDefinition();
+            node.AddChild(id);
+
+            var t = NextToken();
+            if (t.IsOperator(Operator.Assign)) {
+                var expr = ParseExpression();
+
+                node.AddChild(expr);
+            } else if (t.IsDelimiter(Delimiter.BraceOpen)) {
+                node.IsArray = true;
+
+                var expr = ParseExpression();
+                node.AddChild(expr);
+                
+                t = NextToken();
+                AssertDelimiter(Delimiter.BraceClose, t);
+
+                node.PropagatePosition(t);
+            }
+            else {
+                _stream.Previous();
+            }
+
+            return node;
         }
 
-        private AstNode ParseConstant()
+        private Constant ParseConstant()
         {
-            return null;
+            var node = (Constant) TryReadNode(Keyword.Const, typeof(Constant));
+            if (node == null) {
+                return null;
+            }
+            
+            do {
+                var definition = ParseConstDefinition();
+
+                node.AddChild(definition);
+            } while (NextToken().IsDelimiter(Delimiter.Comma));
+            _stream.Previous(); // Not comma encountered
+
+            var t = NextToken();
+            AssertDelimiter(Delimiter.Semicolon, t);
+            
+            return node;
         }
 
-        private AstNode ParseConstDefinition()
+        private ConstDefinition ParseConstDefinition()
         {
-            return null;
+            var id = ParseIdentifier();
+
+            var node = new ConstDefinition();
+            node.AddChild(id);
+
+            var t = NextToken();
+            AssertOperator(Operator.Equal, t);
+
+            var expr = ParseExpression();
+            node.AddChild(expr);
+            
+            return node;
         }
 
         private AssemblyBlock ParseAssemblyBlock()
@@ -586,160 +681,6 @@ namespace src.Parser
             var node = ParseBasicNode(typeof(Identifier), AssertIdentifier, assert);
 
             return (Identifier) node;
-        }
-    }
-
-    public class BaseParser
-    {
-        protected readonly TokenStream _stream;
-
-        public BaseParser(TokenStream stream)
-        {
-            _stream = stream;
-        }
-
-        public Token NextToken(bool movePointer = true, bool fixate = false)
-        {
-            var t = _stream.Next(movePointer);
-            AssertTokenExist(t);
-
-            //if (fixate) {
-            //    _stream.Fixate();
-            //}
-
-            return t;
-        }
-
-        protected AstNode TryExtractVariants(IEnumerable<Func<AstNode>> variants)
-        {
-            foreach (var parse in variants) {
-                var res = parse();
-                if (res == null) {
-                    //_stream.Rollback();
-                }
-                else {
-                    //_stream.Fixate();
-                    return res;
-                }
-            }
-
-            return null;
-        }
-
-        protected IEnumerable<AstNode> ExtractAllChildren(IEnumerable<Func<AstNode>> extractors)
-        {
-            var found = new List<AstNode>();
-
-            AstNode nextNode;
-            do {
-                nextNode = TryExtractVariants(extractors);
-                if (nextNode != null) {
-                    found.Add(nextNode);
-                }
-            } while (nextNode != null);
-
-            return found;
-        }
-
-        protected AstNode TryReadNode(string expectedKey, System.Type nodeType)
-        {
-            var nextToken = _stream.Next(false);
-            if (nextToken == null || !nextToken.IsKeyword(expectedKey)) {
-                return null;
-            }
-            _stream.Next(); // instead of using fixate
-            //_stream.Fixate();
-
-            var node = (AstNode) Activator.CreateInstance(nodeType, new object[] {nextToken});
-
-            return node;
-        }
-
-        protected void ValidateBlockEnd(AstNode node)
-        {
-            var t = NextToken();
-            AssertKeyword(Keyword.End, t);
-
-            node.PropagatePosition(t);
-        }
-
-        protected AstNode ParseBasicNode(System.Type nodeType, Action<Token> assertion, bool assert = true)
-        {
-            var t = NextToken();
-
-            try {
-                assertion.Invoke(t);
-            }
-            catch (SyntaxError) {
-                if (assert) {
-                    throw;
-                }
-
-                _stream.Previous();
-                return null;
-            }
-
-            var node = (AstNode) Activator.CreateInstance(nodeType, new object[] {t});
-
-            return node;
-        }
-
-        protected void AssertTokenExist(Token token)
-        {
-            if (token == null) {
-                var last = _stream.Last();
-
-                // Next char position
-                var start = last.Position.Start.ToTuple();
-                var end = last.Position.End.ToTuple();
-                start.Item2 += 1;
-                end.Item2 += 1;
-                var prettyPos = new Position(start, end);
-
-                throw SyntaxError.Make(SyntaxErrorMessages.UNEXPECTED_EOS(), prettyPos);
-            }
-        }
-
-        protected void AssertKeyword(string expected, Token received)
-        {
-            if (!received.IsKeyword(expected)) {
-                throw SyntaxError.Make(SyntaxErrorMessages.UNEXPECTED_TOKEN, expected, received);
-            }
-        }
-
-        protected void AssertDelimiter(string expected, Token received)
-        {
-            if (!received.IsDelimiter(expected)) {
-                throw SyntaxError.Make(SyntaxErrorMessages.UNEXPECTED_TOKEN, expected, received);
-            }
-        }
-
-        protected void AssertOperator(string expected, Token received)
-        {
-            if (!received.IsOperator(expected)) {
-                throw SyntaxError.Make(SyntaxErrorMessages.UNEXPECTED_TOKEN, expected, received);
-            }
-        }
-
-        protected void AssertIdentifier(Token received)
-        {
-            if (received.Type != TokenType.Identifier) {
-                throw SyntaxError.Make(SyntaxErrorMessages.IDENTIFIER_EXPECTED, received);
-            }
-        }
-
-        protected void AssertLiteral(Token received)
-        {
-            if (received.Type != TokenType.Number) {
-                throw SyntaxError.Make(SyntaxErrorMessages.LITERAL_EXPECTED, received);
-            }
-        }
-
-        protected void AssertRegister(Token received)
-        {
-            if (received.Type != TokenType.Register) {
-                throw SyntaxError.Make(SyntaxErrorMessages.REGISTER_EXPECTED, received);
-            }
         }
     }
 }
