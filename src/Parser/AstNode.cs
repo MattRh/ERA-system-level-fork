@@ -70,7 +70,7 @@ namespace src.Parser
                 return;
             }
 
-            var start = Position.Start.CompareTo(p.Start) < 0 ? p.Start : Position.Start;
+            var start = Position.Start.CompareTo(p.Start) > 0 ? p.Start : Position.Start;
             var end = Position.End.CompareTo(p.End) < 0 ? p.End : Position.End;
 
             Position = new Position(start, end);

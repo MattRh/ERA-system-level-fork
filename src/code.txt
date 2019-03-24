@@ -8,7 +8,7 @@
 //end
 
 routine asem do
-    asm R20 := R10;
+    asm R20 := *R10;
 end
 
 //code

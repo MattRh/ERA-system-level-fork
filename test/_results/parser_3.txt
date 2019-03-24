@@ -1,5 +1,5 @@
 ProgramRaw: {
-  Routine(routine): {
+  Routine: {
     RoutineAttribute(start)
     Identifier(ender)
     Results: {

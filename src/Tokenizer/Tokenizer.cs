@@ -144,6 +144,9 @@ namespace src.Tokenizer
                 pos.Item1--; // Decrease line
                 pos.Item2 = _prevLineLength + 1; // Set old line length and one character longer
             }
+            else {
+                pos.Item2 -= value.Length;
+            }
 
             return new Token(type, value, pos);
         }

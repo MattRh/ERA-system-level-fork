@@ -60,7 +60,7 @@ namespace src.Exceptions
                 result += $" in {line}:{symbol}:";
 
                 if (Source != null) {
-                    var codePart = Source.Highlight(line, symbol - length, length);
+                    var codePart = Source.Highlight(line, symbol, length);
                     result += "\n\n" + codePart;
                 }
             }

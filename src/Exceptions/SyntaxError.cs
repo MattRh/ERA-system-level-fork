@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using src.Parser;
 using src.Tokenizer;
 using src.Utils;
 
@@ -68,15 +70,20 @@ namespace src.Exceptions
         {
             return $"Unexpected token. Expected identifier but got `{received}`";
         }
-        
+
         public static string LITERAL_EXPECTED(Token received)
         {
             return $"Unexpected token. Expected numeric literal but got `{received}`";
         }
-        
+
         public static string REGISTER_EXPECTED(Token received)
         {
             return $"Unexpected token. Expected register but got `{received}`";
+        }
+
+        public static string INVALID_ASM_DEREFERENCE_USE()
+        {
+            return "Dereference in assembly can be used only with assignment operator";
         }
     }
 }

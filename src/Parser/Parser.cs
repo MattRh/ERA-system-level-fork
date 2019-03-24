@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Text;
 using src.Exceptions;
 using src.Parser.Nodes;
@@ -491,7 +489,13 @@ namespace src.Parser
 
         private AssemblyOperation ParseAssemblyOperation()
         {
-            // todo: support for dereference
+            var asterisk = NextToken(false);
+            if (asterisk.IsOperator(Operator.Asterisk)) {
+                _stream.Next();
+            }
+            else {
+                asterisk = null;
+            }
 
             var reg = ParseRegister();
 
@@ -514,10 +518,41 @@ namespace src.Parser
             }
 
             var node = new AssemblyOperation(op);
-            node.AddChild(reg);
 
+            if (asterisk != null) {
+                var deref = new Dereference(asterisk);
+                deref.AddChild(reg);
+
+                node.AddChild(deref);
+            }
+            else {
+                node.AddChild(reg);
+
+                asterisk = NextToken(false);
+                if (asterisk.IsOperator(Operator.Asterisk)) {
+                    _stream.Next();
+                }
+                else {
+                    asterisk = null;
+                }
+            }
+
+            // If we have two dereferences in the statement ParseRegister will fail
             reg = ParseRegister();
-            node.AddChild(reg);
+
+            if (asterisk != null) {
+                var deref = new Dereference(asterisk);
+                deref.AddChild(reg);
+
+                node.AddChild(deref);
+            }
+            else {
+                node.AddChild(reg);
+            }
+
+            if (!op.IsOperator(Operator.Assign) && asterisk != null) {
+                throw SyntaxError.Make(SyntaxErrorMessages.INVALID_ASM_DEREFERENCE_USE(), node.Position);
+            }
 
             return node;
         }
