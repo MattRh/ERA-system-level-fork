@@ -44,6 +44,9 @@ namespace src.Parser.Nodes
 
     public class AssemblyCondition : AssemblyStatement
     {
+        public AssemblyCondition(Token t) : base(t)
+        {
+        }
     }
 
     public class Register : AstNode

@@ -7,8 +7,11 @@
 //start routine ender: R30 do
 //end
 
-routine asem do
-    asm R20 := *R10;
+routine t do
+    asm
+        R20 := *R10,
+        if R2 goto R20
+    end
 end
 
 //code
