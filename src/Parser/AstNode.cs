@@ -11,6 +11,7 @@ namespace src.Parser
     {
         public readonly string Value;
         public Position Position { get; private set; }
+        public AstNode Parent { get; private set; }
 
         public readonly List<AstNode> Children = new List<AstNode>();
 
@@ -32,6 +33,7 @@ namespace src.Parser
             }
 
             Children.Add(node);
+            node.Parent = this;
 
             if (node.Position != null) {
                 PropagatePosition(node.Position);

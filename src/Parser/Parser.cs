@@ -285,17 +285,60 @@ namespace src.Parser
 
         private RoutineBody ParseRoutineBody()
         {
-            return null;
+            var t = NextToken();
+            AssertKeyword(Keyword.Do, t);
+
+            var node = new RoutineBody();
+
+            var children = ExtractAllChildren(new Func<AstNode>[] {
+                ParseVarDeclaration,
+                ParseStatement,
+            });
+            node.AddChildren(children);
+
+            ValidateBlockEnd(node);
+
+            return node;
         }
 
         private Statement ParseStatement()
         {
-            return null;
+            var label = ParseLabel();
+
+            var node = new Statement();
+
+            if (label != null) {
+                node.AddChild(node);
+            }
+
+            var inner = ParseAssemblyBlock();
+            if (inner == null) {
+                inner = ParseExtensionStament();
+            }
+
+            node.AddChild(inner);
+
+            return node;
         }
 
         private Label ParseLabel()
         {
-            return null;
+            var t = NextToken();
+            if (!t.IsOperator(Operator.Less)) {
+                _stream.Previous();
+
+                return null;
+            }
+
+            var node = new Label();
+
+            var id = ParseIdentifier();
+            node.AddChild(id);
+
+            t = NextToken();
+            AssertOperator(Operator.Greater, t);
+
+            return node;
         }
 
         private AstNode ParseVarDeclaration()
@@ -334,6 +377,11 @@ namespace src.Parser
         }
 
         private AstNode ParseAssemblyStatement()
+        {
+            return null;
+        }
+
+        private AstNode ParseExtensionStament()
         {
             return null;
         }

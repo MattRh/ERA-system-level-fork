@@ -16,6 +16,12 @@ namespace test.TestSuites
         {
             RunTest("parser_2");
         }
+        
+        [Test]
+        public void EmptyRoutineTestCase()
+        {
+            RunTest("parser_3");
+        }
 
         public void RunTest(string name)
         {
