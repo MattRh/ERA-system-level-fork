@@ -1,7 +1,6 @@
 namespace src.Parser.Nodes
 {
-    public class Constant
+    public class Constant : AstNode
     {
-        
     }
 }

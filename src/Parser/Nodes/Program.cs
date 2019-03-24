@@ -5,7 +5,7 @@ using src.Tokenizer;
 
 namespace src.Parser.Nodes
 {
-    public class ProgramRaw: AstNode
+    public class ProgramRaw : AstNode
     {
         public List<Annotation> Annotations = new List<Annotation>();
         public List<Data> Datas = new List<Data>();
@@ -33,13 +33,13 @@ namespace src.Parser.Nodes
                         throw new SemanticError("todo");
                     }
                     code = c;
-                    
+
                     break;
             }
         }
     }
 
-    public class ProgramCombined: AstNode
+    public class ProgramCombined : AstNode
     {
     }
 }

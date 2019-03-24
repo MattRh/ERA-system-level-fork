@@ -313,7 +313,7 @@ namespace src.Parser
 
             var inner = ParseAssemblyBlock();
             if (inner == null) {
-                inner = ParseExtensionStament();
+                inner = ParseExtensionStatement();
             }
 
             node.AddChild(inner);
@@ -381,7 +381,7 @@ namespace src.Parser
             return null;
         }
 
-        private AstNode ParseExtensionStament()
+        private AstNode ParseExtensionStatement()
         {
             return null;
         }

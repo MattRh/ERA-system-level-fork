@@ -1,7 +1,6 @@
 namespace src.Parser.Nodes
 {
-    public class Code: AstNode
+    public class Code : AstNode
     {
-        
     }
 }
