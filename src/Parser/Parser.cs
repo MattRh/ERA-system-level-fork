@@ -391,7 +391,7 @@ namespace src.Parser
 
             if (t.Type != TokenType.Keyword || !allowedTypes.Contains(t.Value)) {
                 _stream.Previous();
-                
+
                 if (assert) {
                     throw SyntaxError.Make(SyntaxErrorMessages.TYPE_EXPECTED, t);
                 }
@@ -416,12 +416,13 @@ namespace src.Parser
                 var expr = ParseExpression();
 
                 node.AddChild(expr);
-            } else if (t.IsDelimiter(Delimiter.BraceOpen)) {
+            }
+            else if (t.IsDelimiter(Delimiter.BraceOpen)) {
                 node.IsArray = true;
 
                 var expr = ParseExpression();
                 node.AddChild(expr);
-                
+
                 t = NextToken();
                 AssertDelimiter(Delimiter.BraceClose, t);
 
@@ -440,7 +441,7 @@ namespace src.Parser
             if (node == null) {
                 return null;
             }
-            
+
             do {
                 var definition = ParseConstDefinition();
 
@@ -450,7 +451,7 @@ namespace src.Parser
 
             var t = NextToken();
             AssertDelimiter(Delimiter.Semicolon, t);
-            
+
             return node;
         }
 
@@ -466,7 +467,7 @@ namespace src.Parser
 
             var expr = ParseExpression();
             node.AddChild(expr);
-            
+
             return node;
         }
 
@@ -657,7 +658,112 @@ namespace src.Parser
             return null;
         }
 
+        private AstNode ParseLoop()
+        {
+            return null;
+        }
+
+        private AstNode ParseForLoop()
+        {
+            return null;
+        }
+
+        private AstNode ParseWhileLoop()
+        {
+            return null;
+        }
+
+        private AstNode ParseLoopBody()
+        {
+            return null;
+        }
+
+        private AstNode ParseBlockBody()
+        {
+            return null;
+        }
+
+        private AstNode ParseBreak()
+        {
+            return null;
+        }
+
+        private AstNode ParseGoto()
+        {
+            return null;
+        }
+
+        private AstNode ParseAssignment()
+        {
+            return null;
+        }
+
+        private AstNode ParseSwap()
+        {
+            return null;
+        }
+
+        private AstNode ParseIf()
+        {
+            return null;
+        }
+
+        private AstNode ParseElse()
+        {
+            return null;
+        }
+
+        private AstNode ParseCall()
+        {
+            return null;
+        }
+
+        private AstNode ParseCallArgs()
+        {
+            return null;
+        }
+
         private AstNode ParseExpression()
+        {
+            return null;
+        }
+
+        private AstNode ParseOperator()
+        {
+            return null;
+        }
+
+        private AstNode ParseCompOperator()
+        {
+            return null;
+        }
+
+        private AstNode ParseOperand()
+        {
+            return null;
+        }
+
+        private AstNode ParsePrimary()
+        {
+            return null;
+        }
+
+        private AstNode ParseArrayAccess()
+        {
+            return null;
+        }
+
+        private AstNode ParseReference()
+        {
+            return null;
+        }
+
+        private AstNode ParseDereference()
+        {
+            return null;
+        }
+
+        private AstNode ParseExplicitAddress()
         {
             return null;
         }
