@@ -1,0 +1,17 @@
+ProgramRaw: {
+  Annotation: {
+    PragmaDeclaration: {
+      Identifier(ADF)
+      PragmaText(R30,load)
+    }
+    PragmaDeclaration: {
+      Identifier(AGF)
+    }
+  }
+  Annotation: {
+    PragmaDeclaration: {
+      Identifier(dsf)
+      PragmaText(abv)
+    }
+  }
+}

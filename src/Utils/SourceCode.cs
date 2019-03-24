@@ -3,7 +3,7 @@ using System.IO;
 using System.Security;
 using System.Text;
 
-namespace Erasystemlevel
+namespace src.Utils
 {
     public class SourceCode
     {
@@ -26,13 +26,13 @@ namespace Erasystemlevel
             _fullText = reader.ReadToEnd();
 
             // Convert CRLF and CR to LF
+            // that is possible to do on this stage due to lack of strings support in our language
             _fullText = _fullText.Replace("\r\n", "\n")
                 .Replace("\n\r", "\n")
                 .Replace("\r", "\n");
 
             // Ensure that we always have new line a the end
-            if (!_fullText.EndsWith("\n"))
-            {
+            if (!_fullText.EndsWith("\n")) {
                 _fullText += "\n";
             }
         }
@@ -42,7 +42,7 @@ namespace Erasystemlevel
             Symbol = 0;
         }
 
-        public char PopChar()
+        public string PopChar()
         {
             var next = PeekChar();
             Symbol++;
@@ -50,14 +50,13 @@ namespace Erasystemlevel
             return next;
         }
 
-        public char PeekChar()
+        public string PeekChar()
         {
-            if (EndOfFile())
-            {
+            if (EndOfFile()) {
                 throw new SecurityException("Failed to peek symbol. End of file is reached");
             }
 
-            return _fullText[Symbol];
+            return _fullText[Symbol].ToString();
         }
 
         public void GoBack(int symbols = 1)
@@ -75,19 +74,18 @@ namespace Erasystemlevel
             return _fullText;
         }
 
-        public string Line(int number)
+        public string FetchLine(int number, string defaultLine = "")
         {
             var lines = _fullText.Split('\n');
 
-            return lines.Length < number ? "" : lines[number - 1];
+            return number >= lines.Length || number < 0 ? defaultLine : lines[number];
         }
 
         public string Highlight(int line, int? symbol, int? length)
         {
-            var res = Line(line);
-            if (symbol != null)
-            {
-                res += MakeHighlight((int) symbol, length);
+            var res = FetchLine(line);
+            if (symbol != null) {
+                res += "\n" + MakeHighlight((int) symbol, length);
             }
 
             return res;
@@ -95,12 +93,11 @@ namespace Erasystemlevel
 
         private static string MakeHighlight(int offset, int? length)
         {
-            if (length == null || length <= 0)
-            {
+            if (length == null || length <= 0) {
                 length = 1;
             }
 
-            var dashesLen = Math.Max(0, offset - 1);
+            var dashesLen = Math.Max(0, offset);
             var dashes = new string('-', dashesLen);
 
             var pointer = new string('^', (int) length);

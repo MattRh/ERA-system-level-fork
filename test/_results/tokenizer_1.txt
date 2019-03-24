@@ -1,0 +1,25 @@
+{type: Keyword, pos: (0, 0), value: start}
+{type: Keyword, pos: (0, 6), value: routine}
+{type: Keyword, pos: (0, 14), value: int}
+{type: Delimiter, pos: (0, 17), value: (}
+{type: Delimiter, pos: (0, 18), value: )}
+{type: Delimiter, pos: (0, 19), value: :}
+{type: Register, pos: (0, 21), value: R30}
+{type: NewLine, pos: (0, 25), value: }
+{type: Keyword, pos: (1, 0), value: code}
+{type: NewLine, pos: (1, 5), value: }
+{type: Keyword, pos: (2, 4), value: const}
+{type: Identifier, pos: (2, 10), value: a}
+{type: Operator, pos: (2, 12), value: =}
+{type: Number, pos: (2, 14), value: 5}
+{type: Delimiter, pos: (2, 15), value: ;}
+{type: NewLine, pos: (2, 17), value: }
+{type: Identifier, pos: (3, 4), value: codeb}
+{type: Operator, pos: (3, 10), value: :=}
+{type: Number, pos: (3, 13), value: 0}
+{type: Delimiter, pos: (3, 14), value: ;}
+{type: NewLine, pos: (3, 16), value: }
+{type: LineComment, pos: (4, 6), value: cst d = 5;}
+{type: NewLine, pos: (4, 17), value: }
+{type: Keyword, pos: (5, 0), value: end}
+{type: NewLine, pos: (5, 4), value: }

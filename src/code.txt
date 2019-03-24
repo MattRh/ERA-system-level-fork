@@ -1,20 +1,23 @@
-﻿entry routine func ()
-do
-    for i from 1 to 2 step 1
-        loop
-        end
-end
+//pragma RegSave(R20);
+//data LInE_3 2343, end
 
-module Foo
-    //data ASD 23, 43 end
-    routine func():> R1,R2
-    do
-        const id = 2, id1 = 3;
-    end
-end
+//module TestModule
+//end
+
+//start routine ender: R30 do
+//end
+
+//routine t do
+    //asm R20 := *R10, if R2 goto R20 end
+//end
 
 code
-    const a = 5;
-    const b = 3;
-    //cst d = 5;
+    int a, b;
 end
+
+//code
+//    const a = 5;
+//    int codeb = 3;
+//    codeb := 0;
+//    //cst d = 5;
+//end

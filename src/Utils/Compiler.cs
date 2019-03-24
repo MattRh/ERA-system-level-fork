@@ -1,7 +1,9 @@
 using System;
+using src.Interfaces;
+using src.Parser;
 using src.Tokenizer;
 
-namespace Erasystemlevel
+namespace src.Utils
 {
     public class Compiler
     {
@@ -9,20 +11,27 @@ namespace Erasystemlevel
         private const bool Optimize = true;
 
         public SourceCode SourceCode { get; private set; }
-        public Tokenizer Tokenizer { get; private set; }
+
+        public Tokenizer.Tokenizer Tokenizer { get; private set; }
         public TokenStream TokenStream { get; private set; }
 
-        /*public AstNode astTree;*/
+        public Parser.Parser Parser { get; private set; }
+        public AstNode AstTree { get; private set; }
 
         public Compiler(string filepath)
         {
             Read(filepath);
         }
 
+        public Compiler(SourceCode source)
+        {
+            SourceCode = source;
+        }
+
         public string Compile()
         {
             Tokenize();
-//            Parse();
+            Parse();
 //            Analyze();
 //            Generate();
 
@@ -34,9 +43,11 @@ namespace Erasystemlevel
             SourceCode = new SourceCode(path);
         }
 
-        private void Tokenize()
+        public void Tokenize()
         {
-            Tokenizer = new Tokenizer(SourceCode);
+            Contract.Requires(SourceCode != null);
+
+            Tokenizer = new Tokenizer.Tokenizer(SourceCode);
             Tokenizer.Process();
             //PrintDebug(Tokenizer);
 
@@ -44,14 +55,18 @@ namespace Erasystemlevel
             //PrintDebug(TokenStream);
         }
 
-        /*private void Parse()
+        public void Parse()
         {
-            Parser.Parser._debug = false;
-            astTree = Parser.Parser.ParseUnit(tokenReader);
-            printDebug("Parse tree:\n" + astTree + "\n");
-        }*/
+            Contract.Requires(Tokenizer != null);
+            Contract.Requires(TokenStream != null);
 
-        /*private void Analyze()
+            Parser = new Parser.Parser(TokenStream);
+
+            AstTree = Parser.ParseProgram();
+            PrintDebug(AstTree, "Parse tree");
+        }
+
+        /*public void Analyze()
         {
             var semantic = new SemanticAnalyzer(astTree);
             semantic.analyze();
@@ -65,7 +80,7 @@ namespace Erasystemlevel
             //printDebug("Semantic tree:\n" + tree + "\n");
         }*/
 
-        /*private void Generate()
+        /*public void Generate()
         {
             var codeGen = new CodeGenerator(aTree, semantic.moduleTable, semantic.dataTable);
             codeGen.generate();
@@ -74,37 +89,19 @@ namespace Erasystemlevel
             printDebug("Generated assembly:\n" + asmCode);
         }*/
 
-        private void PrintDebug(Tokenizer tokenizer)
+        private static void PrintDebug(IDebuggable o, string description = null)
         {
-            foreach (var token in tokenizer.Tokens)
-            {
-                PrintDebug(token.ToJsonString());
+            if (description == null) {
+                description = o.GetType().ToString();
             }
 
-            PrintDebug("");
-        }
-
-        private void PrintDebug(TokenStream tokenStream)
-        {
-            Token next;
-            do
-            {
-                next = tokenStream.Next();
-                if (next != null)
-                {
-                    PrintDebug(next.ToJsonString());
-                }
-            } while (next != null);
-
-            tokenStream.Reset();
-
+            PrintDebug(description + ":\n" + o.ToDebugString());
             PrintDebug("");
         }
 
         private static void PrintDebug(string line)
         {
-            if (Debug)
-            {
+            if (Debug) {
                 Console.WriteLine(line);
             }
         }

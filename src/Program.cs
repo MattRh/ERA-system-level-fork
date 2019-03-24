@@ -1,6 +1,9 @@
-﻿using System;
-using Erasystemlevel;
-using Erasystemlevel.Exception;
+﻿#define DEBUG
+#define CONTRACTS
+
+using System;
+using src.Exceptions;
+using src.Utils;
 
 namespace src
 {
@@ -13,28 +16,13 @@ namespace src
             var compiler = new Compiler(CODE_FILE);
 
             string eraAsm;
-            try
-            {
+            try {
                 eraAsm = compiler.Compile();
             }
-            catch (TokenizationError e)
-            {
-                PrintError("Tokenization error: ", e);
-                return;
-            }
-            catch (SyntaxError e)
-            {
-                PrintError("Syntax error: ", e);
-                return;
-            }
-            catch (SemanticError e)
-            {
-                PrintError("Semantic error: ", e);
-                return;
-            }
-            catch (GenerationError e)
-            {
-                PrintError("Generation error: ", e);
+            catch (CompilationError e) {
+                e.Source = compiler.SourceCode;
+                Console.WriteLine(e.Verbose());
+
                 return;
             }
 
