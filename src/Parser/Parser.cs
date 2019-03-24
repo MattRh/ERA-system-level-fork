@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Text;
 using src.Exceptions;
 using src.Parser.Nodes;
 using src.Tokenizer;
@@ -54,12 +51,15 @@ namespace src.Parser
             } while (NextToken().IsDelimiter(Delimiter.Comma));
             _stream.Previous(); // Not comma encountered
 
-            ValidateBlockEnd(node);
+            var t = NextToken();
+            AssertDelimiter(Delimiter.Semicolon, t);
+
+            node.PropagatePosition(t);
 
             return node;
         }
 
-        private AstNode ParsePragmaDeclaration()
+        private PragmaDeclaration ParsePragmaDeclaration()
         {
             var node = new PragmaDeclaration();
 
@@ -74,14 +74,17 @@ namespace src.Parser
                 node.AddChild(text);
             }
 
-            ValidateBlockEnd(node);
+            var t = NextToken();
+            AssertDelimiter(Delimiter.ParenthesisClose, t);
+
+            node.PropagatePosition(t);
 
             return node;
         }
 
-        private AstNode ParsePragmaText()
+        private PragmaText ParsePragmaText()
         {
-            var tmp = new PragmaText();
+            var tmp = new PragmaText(); // contains only position
             var text = string.Empty;
 
             var next = NextToken();
@@ -93,13 +96,17 @@ namespace src.Parser
             }
             _stream.Previous(); // Parenthesis encountered
 
+            if (text == string.Empty) {
+                return null;
+            }
+
             var node = new PragmaText(text);
             node.PropagatePosition(tmp.Position);
 
             return node;
         }
 
-        private AstNode ParseCode()
+        private Code ParseCode()
         {
             var node = (Code) TryReadNode(Keyword.Code, typeof(Code));
             if (node == null) {
@@ -108,7 +115,7 @@ namespace src.Parser
 
             var children = ExtractAllChildren(new Func<AstNode>[] {
                 ParseVarDeclaration,
-                ParseStatment,
+                ParseStatement,
             });
             node.AddChildren(children);
 
@@ -117,7 +124,7 @@ namespace src.Parser
             return node;
         }
 
-        private AstNode ParseData()
+        private Data ParseData()
         {
             var node = (Data) TryReadNode(Keyword.Data, typeof(Data));
             if (node == null) {
@@ -143,7 +150,7 @@ namespace src.Parser
             return node;
         }
 
-        private AstNode ParseModule()
+        private Module ParseModule()
         {
             var node = (Module) TryReadNode(Keyword.Module, typeof(Module));
             if (node == null) {
@@ -164,7 +171,129 @@ namespace src.Parser
             return node;
         }
 
-        private AstNode ParseRoutine()
+        private Routine ParseRoutine()
+        {
+            var attr = ParseAttribute();
+
+            var node = (Routine) TryReadNode(Keyword.Routine, typeof(Routine));
+            if (node == null) {
+                return null;
+            }
+
+            if (attr != null) {
+                node.AddChild(attr);
+            }
+
+            var id = ParseIdentifier();
+            node.AddChild(id);
+
+            var parameters = ParseParameters();
+            if (parameters != null) {
+                node.AddChild(parameters);
+            }
+
+            var results = ParseResults();
+            if (results != null) {
+                node.AddChild(results);
+            }
+
+            var next = NextToken();
+            if (next.IsDelimiter(Delimiter.Semicolon)) {
+                node.PropagatePosition(next);
+
+                return node;
+            }
+            _stream.Previous(); // not semicolon encountered
+
+            var body = ParseRoutineBody();
+            node.AddChild(body);
+
+            return node;
+        }
+
+        private RoutineAttribute ParseAttribute()
+        {
+            var node = (RoutineAttribute) TryReadNode(Keyword.Start, typeof(RoutineAttribute));
+            if (node == null) {
+                node = (RoutineAttribute) TryReadNode(Keyword.Entry, typeof(RoutineAttribute));
+            }
+
+            return node;
+        }
+
+        private Parameters ParseParameters()
+        {
+            var t = NextToken();
+            if (!t.IsDelimiter(Delimiter.ParenthesisOpen)) {
+                _stream.Previous(); // Not open parenthesis encountered
+
+                return null;
+            }
+
+            var node = new Parameters();
+            do {
+                var parameter = ParseParameter();
+
+                node.AddChild(parameter);
+            } while (NextToken().IsDelimiter(Delimiter.Comma));
+            _stream.Previous(); // Not comma encountered
+
+            t = NextToken();
+            AssertDelimiter(Delimiter.ParenthesisClose, t);
+
+            return null;
+        }
+
+        private Parameter ParseParameter()
+        {
+            var node = new Parameter();
+
+            var register = ParseRegister(false);
+            if (register != null) {
+                node.AddChild(register);
+            }
+            else {
+                var type = ParseType();
+                var id = ParseIdentifier();
+
+                node.AddChild(type);
+                node.AddChild(id);
+            }
+
+            return node;
+        }
+
+        private Results ParseResults()
+        {
+            var t = NextToken();
+            if (!t.IsDelimiter(Delimiter.Colon)) {
+                _stream.Previous(); // Not colon encountered
+
+                return null;
+            }
+
+            var node = new Results();
+            do {
+                var register = ParseRegister();
+
+                node.AddChild(register);
+            } while (NextToken().IsDelimiter(Delimiter.Comma));
+            _stream.Previous(); // Not comma encountered
+
+            return node;
+        }
+
+        private RoutineBody ParseRoutineBody()
+        {
+            return null;
+        }
+
+        private Statement ParseStatement()
+        {
+            return null;
+        }
+
+        private Label ParseLabel()
         {
             return null;
         }
@@ -179,56 +308,55 @@ namespace src.Parser
             return null;
         }
 
+        private AstNode ParseType()
+        {
+            return null;
+        }
+
+        private AstNode ParseVarDefinition()
+        {
+            return null;
+        }
+
         private AstNode ParseConstant()
         {
             return null;
         }
 
-        private AstNode ParseStatment()
+        private AstNode ParseConstDefinition()
         {
             return null;
         }
 
+        private AstNode ParseAssemblyBlock()
+        {
+            return null;
+        }
+
+        private AstNode ParseAssemblyStatement()
+        {
+            return null;
+        }
+
+        private Register ParseRegister(bool assert = true)
+        {
+            var node = ParseBasicNode(typeof(Register), AssertRegister, assert);
+
+            return (Register) node;
+        }
+
         private Literal ParseLiteral(bool assert = true)
         {
-            var t = NextToken();
+            var node = ParseBasicNode(typeof(Literal), AssertLiteral, assert);
 
-            try {
-                AssertLiteral(t);
-            }
-            catch (SyntaxError) {
-                if (assert) {
-                    throw;
-                }
-
-                _stream.Previous();
-                return null;
-            }
-
-            var node = new Literal(t);
-
-            return node;
+            return (Literal) node;
         }
 
         private Identifier ParseIdentifier(bool assert = true)
         {
-            var t = NextToken();
+            var node = ParseBasicNode(typeof(Identifier), AssertIdentifier, assert);
 
-            try {
-                AssetIdentifier(t);
-            }
-            catch (SyntaxError) {
-                if (assert) {
-                    throw;
-                }
-
-                _stream.Previous();
-                return null;
-            }
-
-            var node = new Identifier(t);
-
-            return node;
+            return (Identifier) node;
         }
     }
 
@@ -284,16 +412,16 @@ namespace src.Parser
             return found;
         }
 
-        protected AstNode TryReadNode(string expectedKey, Type nodeType)
+        protected AstNode TryReadNode(string expectedKey, System.Type nodeType)
         {
             var nextToken = _stream.Next(false);
             if (nextToken == null || !nextToken.IsKeyword(expectedKey)) {
                 return null;
             }
             _stream.Next(); // instead of using fixate
+            //_stream.Fixate();
 
             var node = (AstNode) Activator.CreateInstance(nodeType, new object[] {nextToken});
-            //_stream.Fixate();
 
             return node;
         }
@@ -304,6 +432,27 @@ namespace src.Parser
             AssertKeyword(Keyword.End, t);
 
             node.PropagatePosition(t);
+        }
+
+        protected AstNode ParseBasicNode(System.Type nodeType, Action<Token> assertion, bool assert = true)
+        {
+            var t = NextToken();
+
+            try {
+                assertion.Invoke(t);
+            }
+            catch (SyntaxError) {
+                if (assert) {
+                    throw;
+                }
+
+                _stream.Previous();
+                return null;
+            }
+
+            var node = (AstNode) Activator.CreateInstance(nodeType, new object[] {t});
+
+            return node;
         }
 
         protected void AssertTokenExist(Token token)
@@ -343,7 +492,7 @@ namespace src.Parser
             }
         }
 
-        protected void AssetIdentifier(Token received)
+        protected void AssertIdentifier(Token received)
         {
             if (received.Type != TokenType.Identifier) {
                 throw SyntaxError.Make(SyntaxErrorMessages.IDENTIFIER_EXPECTED, received);
@@ -354,6 +503,13 @@ namespace src.Parser
         {
             if (received.Type != TokenType.Number) {
                 throw SyntaxError.Make(SyntaxErrorMessages.LITERAL_EXPECTED, received);
+            }
+        }
+
+        protected void AssertRegister(Token received)
+        {
+            if (received.Type != TokenType.Register) {
+                throw SyntaxError.Make(SyntaxErrorMessages.REGISTER_EXPECTED, received);
             }
         }
     }

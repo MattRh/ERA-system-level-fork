@@ -1,11 +1,11 @@
 //pragma RegSave(R20);
 //data LInE_3 2343, end
 
-module TestModule
-    
-end
+//module TestModule
+//end
 
-//routine ender(): R30 do
+entry routine starter: R29;
+//routine ender: R30 do
 //end
 
 //code

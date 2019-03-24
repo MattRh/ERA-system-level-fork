@@ -73,5 +73,10 @@ namespace src.Exceptions
         {
             return $"Unexpected token. Expected numeric literal but got `{received}`";
         }
+        
+        public static string REGISTER_EXPECTED(Token received)
+        {
+            return $"Unexpected token. Expected register but got `{received}`";
+        }
     }
 }

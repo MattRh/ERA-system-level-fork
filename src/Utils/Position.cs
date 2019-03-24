@@ -1,3 +1,4 @@
+using System;
 
 namespace src.Utils
 {
@@ -28,7 +29,7 @@ namespace src.Utils
         }
     }
 
-    public class Point
+    public class Point : IComparable<Point>
     {
         public readonly int Line;
         public readonly int Symbol;
@@ -37,6 +38,15 @@ namespace src.Utils
         {
             this.Line = line;
             this.Symbol = symbol;
+        }
+
+        public int CompareTo(Point other)
+        {
+            if (ReferenceEquals(this, other)) return 0;
+            if (ReferenceEquals(null, other)) return 1;
+
+            var lineComparison = Line.CompareTo(other.Line);
+            return lineComparison != 0 ? lineComparison : Symbol.CompareTo(other.Symbol);
         }
 
         public override string ToString()
