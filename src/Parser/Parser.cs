@@ -54,10 +54,7 @@ namespace src.Parser
             } while (NextToken().IsDelimiter(Delimiter.Comma));
             _stream.Previous(); // Not comma encountered
 
-            var t = NextToken();
-            AssertDelimiter(Delimiter.Semicolon, t);
-
-            node.PropagatePosition(t);
+            ValidateBlockEnd(node);
 
             return node;
         }
@@ -77,10 +74,7 @@ namespace src.Parser
                 node.AddChild(text);
             }
 
-            var t = NextToken();
-            AssertDelimiter(Delimiter.ParenthesisClose, t);
-
-            node.PropagatePosition(t);
+            ValidateBlockEnd(node);
 
             return node;
         }
@@ -118,10 +112,7 @@ namespace src.Parser
             });
             node.AddChildren(children);
 
-            var t = NextToken();
-            AssertKeyword(Keyword.End, t);
-
-            node.PropagatePosition(t);
+            ValidateBlockEnd(node);
 
             return node;
         }
@@ -140,22 +131,37 @@ namespace src.Parser
             if (next != null) {
                 node.AddChild(next);
             }
-            
+
             while (NextToken().IsDelimiter(Delimiter.Comma)) {
                 next = ParseLiteral();
                 node.AddChild(next);
-            } 
+            }
             _stream.Previous(); // Not comma encountered
 
-            var t = NextToken();
-            AssertKeyword(Keyword.End, t);
+            ValidateBlockEnd(node);
 
             return node;
         }
 
         private AstNode ParseModule()
         {
-            return null;
+            var node = (Module) TryReadNode(Keyword.Module, typeof(Module));
+            if (node == null) {
+                return null;
+            }
+
+            var id = ParseIdentifier();
+            node.AddChild(id);
+
+            var children = ExtractAllChildren(new Func<AstNode>[] {
+                ParseVarDeclaration,
+                ParseRoutine,
+            });
+            node.AddChildren(children);
+
+            ValidateBlockEnd(node);
+
+            return node;
         }
 
         private AstNode ParseRoutine()
@@ -240,9 +246,9 @@ namespace src.Parser
             var t = _stream.Next(movePointer);
             AssertTokenExist(t);
 
-            if (fixate) {
-                _stream.Fixate();
-            }
+            //if (fixate) {
+            //    _stream.Fixate();
+            //}
 
             return t;
         }
@@ -252,10 +258,10 @@ namespace src.Parser
             foreach (var parse in variants) {
                 var res = parse();
                 if (res == null) {
-                    _stream.Rollback();
+                    //_stream.Rollback();
                 }
                 else {
-                    _stream.Fixate();
+                    //_stream.Fixate();
                     return res;
                 }
             }
@@ -280,15 +286,24 @@ namespace src.Parser
 
         protected AstNode TryReadNode(string expectedKey, Type nodeType)
         {
-            var nextToken = _stream.Next();
+            var nextToken = _stream.Next(false);
             if (nextToken == null || !nextToken.IsKeyword(expectedKey)) {
                 return null;
             }
+            _stream.Next(); // instead of using fixate
 
             var node = (AstNode) Activator.CreateInstance(nodeType, new object[] {nextToken});
-            _stream.Fixate();
+            //_stream.Fixate();
 
             return node;
+        }
+
+        protected void ValidateBlockEnd(AstNode node)
+        {
+            var t = NextToken();
+            AssertKeyword(Keyword.End, t);
+
+            node.PropagatePosition(t);
         }
 
         protected void AssertTokenExist(Token token)
