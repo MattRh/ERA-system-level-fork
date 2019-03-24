@@ -22,6 +22,12 @@ namespace test.TestSuites
         {
             RunTest("parser_3");
         }
+        
+        [Test]
+        public void AsmBlockTestCase()
+        {
+            RunTest("parser_4");
+        }
 
         public void RunTest(string name)
         {

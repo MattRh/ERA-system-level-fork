@@ -1,0 +1,18 @@
+ProgramRaw: {
+  Code: {
+    Statement: {
+      AssemblyBlock: {
+        AssemblyOperation(:=): {
+          Register(R20)
+          Dereference: {
+            Register(R10)
+          }
+        }
+        AssemblyCondition(if): {
+          Register(R2)
+          Register(R20)
+        }
+      }
+    }
+  }
+}

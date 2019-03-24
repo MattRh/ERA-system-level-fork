@@ -7,12 +7,9 @@
 //start routine ender: R30 do
 //end
 
-routine t do
-    asm
-        R20 := *R10,
-        if R2 goto R20
-    end
-end
+//routine t do
+    //asm R20 := *R10, if R2 goto R20 end
+//end
 
 //code
 //    const a = 5;
