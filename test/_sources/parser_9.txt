@@ -1,0 +1,4 @@
+code
+    int b[10 & 2];
+    short v[R20];
+end

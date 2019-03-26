@@ -42,10 +42,10 @@
 &emsp;: `skip` // NOP  
 &emsp;| `stop` // STOP  
 &emsp;| `format` ( 8 | 16 | 32 ) // format of next command  
-&emsp;| Register `:=` `*`Register // Rj := \*Ri LD  
-&emsp;| Register `:=` Expression // Rj := Const LDA  
+&emsp;| Register `:=` `*`Register // Rj := \*Ri LD    
 &emsp;| `*`Register `:=` Register // \*Rj := Ri ST  
 &emsp;| Register `:=` Register // Rj := Ri MOV  
+&emsp;| Register `:=` Expression // Rj := Const LDC    
 &emsp;| Register `+=` Register // Rj += Ri ADD  
 &emsp;| Register `-=` Register // Rj -= Ri SUB  
 &emsp;| Register `>>=` Register // Rj >>= Ri ASR  
@@ -74,8 +74,8 @@
 
 ---
 
-* **If** : `if` Expression `do` BlockBody ( `end` | `elif` If | `else` BlockBody `end` )
-* **Call** : [ Identifier`.` ] Identifier CallArgs
+* **If** : `if` Expression `do` BlockBody ( `end` | `else` BlockBody `end` )
+* **Call** : [ Identifier`.` ] Identifier CallArgs `;`
 * **CallArgs** : `(` [ Expression { , Expression } ] `)`
 
 ---
@@ -137,6 +137,7 @@ Language supports only one-line comments that starts with `//`
 [ ] Add array and struct default initializer: via '{\_, \_, ..}' construction assignment  
 [ ] Add custom structs support: requires grammar change   
 [ ] Add loops with post conditions (i.e. do .. while)
+[ ] Add support for LDA assembly instructions
 
 ### FP: changes for structs support
 

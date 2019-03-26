@@ -14,6 +14,10 @@ namespace src.Parser.Nodes
         public RoutineAttribute(Token t) : base(t)
         {
         }
+
+        public RoutineAttribute(string v) : base(v)
+        {
+        }
     }
 
     public class Parameters : AstNode

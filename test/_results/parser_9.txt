@@ -1,0 +1,35 @@
+ProgramRaw: {
+  Code: {
+    VarDeclaration: {
+      Variable: {
+        VarType(int)
+        ArrayDefinition: {
+          Identifier(b)
+          Expression: {
+            Operand: {
+              Literal(10)
+            }
+            ExpressionOperator(&)
+            Operand: {
+              Literal(2)
+            }
+          }
+        }
+      }
+    }
+    VarDeclaration: {
+      Variable: {
+        VarType(short)
+        ArrayDefinition: {
+          Identifier(v)
+          Expression: {
+            Operand: {
+              Register(R20)
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

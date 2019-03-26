@@ -61,29 +61,21 @@ namespace src.Exceptions
             return "Unexpected end of stream";
         }
 
-        public static string UNEXPECTED_TOKEN(string expected, Token received)
-        {
-            return $"Unexpected token. Expected `{expected}` but got `{received}`";
-        }
+        public static string UNEXPECTED_TOKEN(string expected, Token received) =>
+            GENERIC_EXPECTED_VALUE($"`{expected}`", received);
 
-        public static string IDENTIFIER_EXPECTED(Token received)
-        {
-            return $"Unexpected token. Expected identifier but got `{received}`";
-        }
+        public static string STATEMENT_EXPECTED(Token received) => GENERIC_EXPECTED_VALUE("some statement", received);
+        public static string IDENTIFIER_EXPECTED(Token received) => GENERIC_EXPECTED_VALUE("identifier", received);
+        public static string LITERAL_EXPECTED(Token received) => GENERIC_EXPECTED_VALUE("numeric literal", received);
+        public static string REGISTER_EXPECTED(Token received) => GENERIC_EXPECTED_VALUE("register", received);
+        public static string TYPE_EXPECTED(Token received) => GENERIC_EXPECTED_VALUE("variable type", received);
+        public static string PRIMARY_EXPECTED(Token received) => GENERIC_EXPECTED_VALUE("primary argument", received);
+        public static string EXPRESSION_EXPECTED(Token received) => GENERIC_EXPECTED_VALUE("expression", received);
+        public static string OPERAND_EXPECTED(Token received) => GENERIC_EXPECTED_VALUE("expression operand", received);
 
-        public static string LITERAL_EXPECTED(Token received)
+        private static string GENERIC_EXPECTED_VALUE(string expected, Token received)
         {
-            return $"Unexpected token. Expected numeric literal but got `{received}`";
-        }
-
-        public static string REGISTER_EXPECTED(Token received)
-        {
-            return $"Unexpected token. Expected register but got `{received}`";
-        }
-        
-        public static string TYPE_EXPECTED(Token received)
-        {
-            return $"Unexpected token. Expected variable type but got `{received}`";
+            return $"Unexpected token. Expected {expected} but got `{received}`";
         }
 
         public static string INVALID_ASM_DEREFERENCE_USE()

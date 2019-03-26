@@ -19,7 +19,10 @@ namespace src.Parser.Nodes
 
     public class VarDefinition : AstNode
     {
-        public bool IsArray;
+    }
+
+    public class ArrayDefinition : VarDefinition
+    {
     }
 
     public class Constant : AstNode

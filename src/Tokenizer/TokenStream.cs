@@ -11,18 +11,21 @@ namespace src.Tokenizer
         };
 
         private readonly Tokenizer _tokenizer;
-        private int _position = 0;
-        private int _checkpoint = 0;
+
+        private int _position;
+        private LinkedList<int> _checkpoints;
 
         public TokenStream(Tokenizer tokenizer)
         {
             _tokenizer = tokenizer;
+
+            Reset();
         }
 
         public void Reset()
         {
             _position = 0;
-            _checkpoint = 0;
+            _checkpoints = new LinkedList<int>();
         }
 
         public Token Previous(bool movePointer = true)
@@ -79,14 +82,20 @@ namespace src.Tokenizer
             return Next(false) != null;
         }
 
-        public void Rollback()
+        public void Rollback(LinkedListNode<int> node = null)
         {
-            _position = _checkpoint;
+            if (node == null) {
+                node = _checkpoints.Last;
+            }
+
+            _position = node.Value;
+
+            _checkpoints.Remove(node);
         }
 
-        public void Fixate()
+        public LinkedListNode<int> Fixate()
         {
-            _checkpoint = _position;
+            return _checkpoints.AddLast(_position);
         }
 
         private Token GetToken(int pos)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using src.Exceptions;
@@ -30,6 +31,8 @@ namespace src.Tokenizer
         public int CurrentSymbol { get; private set; } = 0;
         public (int, int) CurrentPosition => (CurrentLine, CurrentSymbol);
 
+        private string _readSequence;
+
         public List<Token> Tokens = new List<Token>();
 
         public Tokenizer(SourceCode source)
@@ -44,6 +47,8 @@ namespace src.Tokenizer
             _terminals.UnionWith(_delimiters);
             _terminals.UnionWith(_operators);
             _terminals.UnionWith(_keywords);
+
+            _terminals.Add(OtherTerminals.LineComment);
         }
 
         public void Process()
@@ -56,14 +61,14 @@ namespace src.Tokenizer
 
         private Token NextToken()
         {
-            var readSequence = string.Empty;
+            _readSequence = string.Empty;
 
             while (!Source.EndOfFile()) {
                 var next = ReadSymbol();
 
                 if (next.Equals(Whitespace.NewLine)) {
-                    if (readSequence.Length > 0) {
-                        throw new TokenizationError($"Got new line, while reading token: `{readSequence}`");
+                    if (_readSequence.Length > 0) {
+                        throw TokenizationError.UnexpectedEol(_readSequence, GetPosition());
                     }
 
                     return MakeToken(TokenType.NewLine, null);
@@ -73,54 +78,61 @@ namespace src.Tokenizer
                     continue;
                 }
 
-                readSequence += next;
-
-                if (readSequence.Equals(OtherTerminals.LineComment)) {
-                    var text = ReadRemainingLine();
-                    return MakeToken(TokenType.LineComment, text);
-                }
+                _readSequence += next;
 
                 var lookahead = Source.PeekChar();
-                var sequenceLookahead = readSequence + lookahead;
+                var sequenceLookahead = _readSequence + lookahead;
 
                 if (_identifier.IsMatch(sequenceLookahead) || _numeric.IsMatch(sequenceLookahead)) {
                     continue;
                 }
 
                 // Here starts actual checks for token type
-                if (_terminals.Contains(readSequence)) {
-                    while (_terminals.Contains(readSequence + Source.PeekChar())) {
-                        readSequence += ReadSymbol();
+                // If passes this test then it is not identifier or numeric
+                if (SimilarTerminalExists(_readSequence)) {
+                    while (SimilarTerminalExists(_readSequence + Source.PeekChar())) {
+                        _readSequence += ReadSymbol();
                     }
 
-                    if (_delimiters.Contains(readSequence)) {
-                        return MakeToken(TokenType.Delimiter, readSequence);
+                    if (!_terminals.Contains(_readSequence)) {
+                        throw TokenizationError.UnknownSymbol(_readSequence, GetPosition());
                     }
-                    if (_operators.Contains(readSequence)) {
-                        return MakeToken(TokenType.Operator, readSequence);
+
+                    if (_readSequence.Equals(OtherTerminals.LineComment)) {
+                        var text = ReadRemainingLine();
+                        return MakeToken(TokenType.LineComment, text);
                     }
-                    if (_keywords.Contains(readSequence)) {
+
+                    if (_delimiters.Contains(_readSequence)) {
+                        return MakeToken(TokenType.Delimiter, _readSequence);
+                    }
+                    if (_operators.Contains(_readSequence)) {
+                        return MakeToken(TokenType.Operator, _readSequence);
+                    }
+                    if (_keywords.Contains(_readSequence)) {
                         // there should be check for non id symbol in lookahead
                         // but it is not needed doe to greedy reading
-                        return MakeToken(TokenType.Keyword, readSequence);
+                        return MakeToken(TokenType.Keyword, _readSequence);
                     }
                 }
 
-                if (_register.IsMatch(readSequence)) {
+                if (_register.IsMatch(_readSequence)) {
                     // there should be check for non id symbol in lookahead
                     // but it is not needed doe to greedy reading
-                    return MakeToken(TokenType.Register, readSequence);
+                    return MakeToken(TokenType.Register, _readSequence);
                 }
-                if (_identifier.IsMatch(readSequence)) {
-                    return MakeToken(TokenType.Identifier, readSequence);
+                if (_identifier.IsMatch(_readSequence)) {
+                    return MakeToken(TokenType.Identifier, _readSequence);
                 }
-                if (_numeric.IsMatch(readSequence)) {
-                    return MakeToken(TokenType.Number, readSequence);
+                if (_numeric.IsMatch(_readSequence)) {
+                    return MakeToken(TokenType.Number, _readSequence);
                 }
+
+                throw TokenizationError.UnknownSymbol(_readSequence, GetPosition());
             }
 
-            if (readSequence.Length > 0) {
-                throw new TokenizationError($"Failed to tokenize string: `{readSequence}`");
+            if (_readSequence.Length > 0) {
+                throw TokenizationError.TokenizationFail(_readSequence, GetPosition());
             }
 
             return null;
@@ -133,6 +145,26 @@ namespace src.Tokenizer
 
             Tokens.Clear();
             Source.Reset();
+        }
+
+        private bool SimilarTerminalExists(string value)
+        {
+            foreach (var terminal in _terminals) {
+                if (terminal.StartsWith(value)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private Position GetPosition()
+        {
+            var line = CurrentLine;
+            var symbol = CurrentSymbol - 1;
+            var length = Math.Max(1, _readSequence.Length);
+
+            return new Position(line, symbol, length);
         }
 
         private Token MakeToken(TokenType type, string value)
