@@ -837,10 +837,10 @@ namespace src.Parser
             if (!t.IsOperator(Operator.Assign)) {
                 _stream.Previous(); // Undo operator read
                 _stream.Previous(); // Undo 'primary' read
-                
+
                 return null;
             }
-            
+
             var node = new Assignment();
             node.AddChild(arg0);
 
@@ -849,7 +849,7 @@ namespace src.Parser
 
             t = NextToken();
             AssertDelimiter(Delimiter.Semicolon, t);
-            
+
             return node;
         }
 
@@ -864,19 +864,22 @@ namespace src.Parser
             if (!t.IsOperator(Operator.AssignSwap)) {
                 _stream.Previous(); // Undo operator read
                 _stream.Previous(); // Undo 'primary' read
-                
+
                 return null;
             }
-            
+
             var node = new Swap();
             node.AddChild(arg0);
 
             var arg1 = ParsePrimary();
+            if (arg1 == null) {
+                throw SyntaxError.Make(SyntaxErrorMessages.PRIMARY_EXPECTED, t);
+            }
             node.AddChild(arg1);
 
             t = NextToken();
             AssertDelimiter(Delimiter.Semicolon, t);
-            
+
             return node;
         }
 
@@ -970,47 +973,209 @@ namespace src.Parser
 
         private Expression ParseExpression()
         {
-            return null;
+            var node = new Expression();
+
+            var operand0 = ParseOperand();
+            node.AddChild(operand0);
+
+            var op = ParseOperator();
+            if (op != null) {
+                var operand1 = ParseOperand();
+                node.AddChild(operand1);
+            }
+
+            return node;
         }
 
         private ExpressionOperator ParseOperator()
         {
-            return null;
+            var compOp = ParseCompOperator();
+            if (compOp != null) {
+                return compOp;
+            }
+
+            var allowedOps = new HashSet<string>() {
+                Operator.Plus,
+                Operator.Minus,
+                Operator.Asterisk,
+                Operator.Ampersand,
+                Operator.Line,
+                Operator.Hat,
+                //Operator.Question,
+            };
+
+            var t = NextToken();
+            if (!allowedOps.Contains(t.Value)) {
+                return null;
+            }
+
+            var node = new ExpressionOperator(t);
+
+            return node;
         }
 
         private CompOperator ParseCompOperator()
         {
-            return null;
+            var allowedOps = new HashSet<string>() {
+                Operator.Equal,
+                Operator.NotEqual,
+                Operator.Less,
+                Operator.Greater,
+            };
+
+            var t = NextToken();
+            if (!allowedOps.Contains(t.Value)) {
+                return null;
+            }
+
+            var node = new CompOperator(t);
+
+            return node;
         }
 
         private Operand ParseOperand()
         {
-            return null;
+            var operand = TryExtractVariants(new Func<AstNode>[] {
+                ParseReceiver,
+                ParseReference,
+                () => ParseLiteral(false),
+            });
+            if (operand == null) {
+                var t = NextToken();
+
+                throw SyntaxError.Make(SyntaxErrorMessages.OPERAND_EXPECTED, t);
+            }
+
+            var node = new Operand();
+            node.AddChild(operand);
+
+            return node;
         }
 
         private Primary ParsePrimary()
         {
-            return null;
+            var primary = TryExtractVariants(new Func<AstNode>[] {
+                ParseReceiver,
+                ParseDereference,
+                ParseExplicitAddress,
+            });
+            if (primary == null) {
+                return null;
+            }
+
+            var node = new Primary();
+            node.AddChild(primary);
+
+            return node;
+        }
+
+        private AstNode ParseReceiver()
+        {
+            return TryExtractVariants(new Func<AstNode>[] {
+                () => ParseIdentifier(false),
+                ParseArrayAccess,
+                () => ParseRegister(false),
+            });
         }
 
         private ArrayAccess ParseArrayAccess()
         {
-            return null;
+            var id = ParseIdentifier(false);
+            if (id == null) {
+                return null;
+            }
+
+            var t = NextToken();
+            if (!t.IsDelimiter(Delimiter.BraceOpen)) {
+                _stream.Previous(); // Undo brace read
+                _stream.Previous(); // Undo identifier read
+
+                return null;
+            }
+
+            var node = new ArrayAccess();
+            node.AddChild(id);
+
+            var expr = ParseExpression();
+            node.AddChild(expr);
+
+            t = NextToken();
+            AssertDelimiter(Delimiter.BraceClose, t);
+
+            node.PropagatePosition(t);
+
+            return node;
         }
 
         private Reference ParseReference()
         {
-            return null;
+            var t = NextToken();
+            if (!t.IsOperator(Operator.Ampersand)) {
+                _stream.Previous();
+
+                return null;
+            }
+
+            var node = new Reference(t);
+
+            var id = ParseIdentifier();
+            node.AddChild(id);
+
+            return node;
         }
 
         private Dereference ParseDereference()
         {
-            return null;
+            var t = NextToken();
+            if (!t.IsOperator(Operator.Asterisk)) {
+                _stream.Previous();
+
+                return null;
+            }
+
+            var node = new Dereference(t);
+
+            // Check that it is not explicit address
+            t = NextToken(false);
+            if (t.Type == TokenType.Number) {
+                _stream.Previous(); // Undo asterisk read
+
+                return null;
+            }
+
+            var reg = ParseRegister(false);
+            if (reg != null) {
+                node.AddChild(reg);
+            }
+            else {
+                var id = ParseIdentifier();
+                node.AddChild(id);
+            }
+
+            return node;
         }
 
         private ExplicitAddress ParseExplicitAddress()
         {
-            return null;
+            var t = NextToken();
+            if (!t.IsOperator(Operator.Asterisk)) {
+                _stream.Previous();
+
+                return null;
+            }
+
+            var node = new ExplicitAddress(t);
+
+            var num = ParseLiteral(false);
+            if (num == null) {
+                _stream.Previous(); // Undo asterisk read
+
+                return null;
+            }
+
+            node.AddChild(num);
+
+            return node;
         }
 
         private Register ParseRegister(bool assert = true)

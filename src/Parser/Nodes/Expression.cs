@@ -12,10 +12,16 @@ namespace src.Parser.Nodes
 
     public class ExpressionOperator : AstNode
     {
+        public ExpressionOperator(Token t) : base(t)
+        {
+        }
     }
 
     public class CompOperator : ExpressionOperator
     {
+        public CompOperator(Token t) : base(t)
+        {
+        }
     }
 
     public class Operand : AstNode
@@ -36,6 +42,9 @@ namespace src.Parser.Nodes
 
     public class Reference : AstNode
     {
+        public Reference(Token t) : base(t.Position)
+        {
+        }
     }
 
     public class Dereference : AstNode
@@ -47,5 +56,8 @@ namespace src.Parser.Nodes
 
     public class ExplicitAddress : AstNode
     {
+        public ExplicitAddress(Token t) : base(t.Position)
+        {
+        }
     }
 }
