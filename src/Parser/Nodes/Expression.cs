@@ -6,6 +6,10 @@ namespace src.Parser.Nodes
     {
     }
 
+    public class EmptyExpression : AstNode
+    {
+    }
+
     public class ExpressionOperator : AstNode
     {
     }

@@ -75,7 +75,7 @@
 ---
 
 * **If** : `if` Expression `do` BlockBody ( `end` | `else` BlockBody `end` )
-* **Call** : [ Identifier`.` ] Identifier CallArgs
+* **Call** : [ Identifier`.` ] Identifier CallArgs `;`
 * **CallArgs** : `(` [ Expression { , Expression } ] `)`
 
 ---

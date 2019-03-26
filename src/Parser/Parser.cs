@@ -456,6 +456,11 @@ namespace src.Parser
             if (label == null && inner == null) {
                 return null;
             }
+            if (label != null && inner == null) {
+                var t = NextToken();
+
+                throw SyntaxError.Make(SyntaxErrorMessages.STATEMENT_EXPECTED, t);
+            }
 
             var node = new Statement();
 
@@ -717,8 +722,7 @@ namespace src.Parser
                 if (!t.IsKeyword(keyword)) {
                     _stream.Previous();
 
-                    // todo: generate and return empty expression
-                    return null;
+                    return new EmptyExpression();
                 }
 
                 return ParseExpression();
@@ -783,7 +787,7 @@ namespace src.Parser
         private BlockBody ParseBlockBody()
         {
             var node = new BlockBody();
-            
+
             var statements = ExtractAllChildren(new Func<Statement>[] {
                 ParseStatement
             });
@@ -824,27 +828,144 @@ namespace src.Parser
 
         private Assignment ParseAssignment()
         {
-            return null;
+            var arg0 = ParsePrimary();
+            if (arg0 == null) {
+                return null;
+            }
+
+            var t = NextToken(false);
+            if (!t.IsOperator(Operator.Assign)) {
+                _stream.Previous(); // Undo operator read
+                _stream.Previous(); // Undo 'primary' read
+                
+                return null;
+            }
+            
+            var node = new Assignment();
+            node.AddChild(arg0);
+
+            var arg1 = ParseExpression();
+            node.AddChild(arg1);
+
+            t = NextToken();
+            AssertDelimiter(Delimiter.Semicolon, t);
+            
+            return node;
         }
 
         private Swap ParseSwap()
         {
-            return null;
+            var arg0 = ParsePrimary();
+            if (arg0 == null) {
+                return null;
+            }
+
+            var t = NextToken(false);
+            if (!t.IsOperator(Operator.AssignSwap)) {
+                _stream.Previous(); // Undo operator read
+                _stream.Previous(); // Undo 'primary' read
+                
+                return null;
+            }
+            
+            var node = new Swap();
+            node.AddChild(arg0);
+
+            var arg1 = ParsePrimary();
+            node.AddChild(arg1);
+
+            t = NextToken();
+            AssertDelimiter(Delimiter.Semicolon, t);
+            
+            return node;
         }
 
         private IfStatement ParseIf()
         {
-            return null;
+            var node = TryReadNode(Keyword.If, typeof(IfStatement));
+            if (node == null) {
+                return null;
+            }
+
+            var expr = ParseExpression();
+            node.AddChild(expr);
+
+            var t = NextToken();
+            AssertKeyword(Keyword.Do, t);
+
+            var body = ParseBlockBody();
+            node.AddChild(body);
+
+            t = NextToken(false);
+            if (t.IsKeyword(Keyword.Else)) {
+                _stream.Next();
+
+                body = ParseBlockBody();
+                node.AddChild(body);
+            }
+
+            ValidateBlockEnd(node);
+
+            return (IfStatement) node;
         }
 
         private RoutineCall ParseCall()
         {
-            return null;
+            var id = ParseIdentifier(false);
+            if (id == null) {
+                return null;
+            }
+
+            var node = new RoutineCall();
+            node.AddChild(id);
+
+            var t = NextToken(false);
+            if (t.IsDelimiter(Delimiter.Dot)) {
+                _stream.Next();
+
+                id = ParseIdentifier();
+                node.AddChild(id);
+            }
+            else if (!t.IsDelimiter(Delimiter.BraceOpen)) {
+                _stream.Previous(); // undo identifier read
+
+                return null;
+            }
+
+            var args = ParseCallArgs();
+            node.AddChild(args);
+
+            t = NextToken();
+            AssertDelimiter(Delimiter.Semicolon, t);
+
+            return node;
         }
 
         private CallArgs ParseCallArgs()
         {
-            return null;
+            var t = NextToken();
+            AssertDelimiter(Delimiter.BraceOpen, t);
+
+            var node = new CallArgs();
+
+            t = NextToken(false);
+            if (t.IsDelimiter(Delimiter.BraceClose)) {
+                _stream.Next();
+
+                return node;
+            }
+
+            do {
+                var expr = ParseExpression();
+
+                node.AddChild(expr);
+            } while (NextToken().IsDelimiter(Delimiter.Comma));
+            _stream.Previous(); // Not comma encountered
+
+            t = NextToken();
+            AssertDelimiter(Delimiter.BraceClose, t);
+
+            return node;
         }
 
         private Expression ParseExpression()

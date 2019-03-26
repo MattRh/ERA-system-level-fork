@@ -66,6 +66,11 @@ namespace src.Exceptions
             return $"Unexpected token. Expected `{expected}` but got `{received}`";
         }
 
+        public static string STATEMENT_EXPECTED(Token received)
+        {
+            return $"Unexpected token. Expected some statement but got `{received}`";
+        }
+
         public static string IDENTIFIER_EXPECTED(Token received)
         {
             return $"Unexpected token. Expected identifier but got `{received}`";
@@ -80,7 +85,7 @@ namespace src.Exceptions
         {
             return $"Unexpected token. Expected register but got `{received}`";
         }
-        
+
         public static string TYPE_EXPECTED(Token received)
         {
             return $"Unexpected token. Expected variable type but got `{received}`";
