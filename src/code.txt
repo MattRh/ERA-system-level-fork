@@ -1,6 +1,8 @@
 //pragma RegSave(R20);
 //data LInE_3 2343, end
 
+data LInE_3 end
+
 //module TestModule
 //end
 
@@ -18,9 +20,9 @@
     //a[0] := 10;
 //end
 
-code
-    asm R20 := *R10, if R2 goto R20 end
-end
+//code
+/    asm R20 := *R10, if R2 goto R20 end
+//end
 
 //code
 //    const a = 5;
