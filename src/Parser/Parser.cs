@@ -13,6 +13,8 @@ namespace src.Parser
         {
         }
 
+        #region CoreStructures
+
         public ProgramRaw ParseProgram()
         {
             var node = new ProgramRaw();
@@ -55,53 +57,6 @@ namespace src.Parser
             AssertDelimiter(Delimiter.Semicolon, t);
 
             node.PropagatePosition(t);
-
-            return node;
-        }
-
-        private PragmaDeclaration ParsePragmaDeclaration()
-        {
-            var node = new PragmaDeclaration();
-
-            var id = ParseIdentifier();
-            node.AddChild(id);
-
-            AssertDelimiter(Delimiter.ParenthesisOpen, NextToken());
-
-            if (!NextToken(false).IsDelimiter(Delimiter.ParenthesisClose)) {
-                var text = ParsePragmaText();
-
-                node.AddChild(text);
-            }
-
-            var t = NextToken();
-            AssertDelimiter(Delimiter.ParenthesisClose, t);
-
-            node.PropagatePosition(t);
-
-            return node;
-        }
-
-        private PragmaText ParsePragmaText()
-        {
-            var tmp = new PragmaText(); // contains only position
-            var text = string.Empty;
-
-            var next = NextToken();
-            while (!next.IsDelimiter(Delimiter.ParenthesisClose)) {
-                text += next.Value;
-                tmp.PropagatePosition(next);
-
-                next = NextToken();
-            }
-            _stream.Previous(); // Parenthesis encountered
-
-            if (text == string.Empty) {
-                return null;
-            }
-
-            var node = new PragmaText(text);
-            node.PropagatePosition(tmp.Position);
 
             return node;
         }
@@ -171,6 +126,61 @@ namespace src.Parser
             return node;
         }
 
+        #endregion
+
+        #region Pragma
+
+        private PragmaDeclaration ParsePragmaDeclaration()
+        {
+            var node = new PragmaDeclaration();
+
+            var id = ParseIdentifier();
+            node.AddChild(id);
+
+            AssertDelimiter(Delimiter.ParenthesisOpen, NextToken());
+
+            if (!NextToken(false).IsDelimiter(Delimiter.ParenthesisClose)) {
+                var text = ParsePragmaText();
+
+                node.AddChild(text);
+            }
+
+            var t = NextToken();
+            AssertDelimiter(Delimiter.ParenthesisClose, t);
+
+            node.PropagatePosition(t);
+
+            return node;
+        }
+
+        private PragmaText ParsePragmaText()
+        {
+            var tmp = new PragmaText(); // contains only position
+            var text = string.Empty;
+
+            var next = NextToken();
+            while (!next.IsDelimiter(Delimiter.ParenthesisClose)) {
+                text += next.Value;
+                tmp.PropagatePosition(next);
+
+                next = NextToken();
+            }
+            _stream.Previous(); // Parenthesis encountered
+
+            if (text == string.Empty) {
+                return null;
+            }
+
+            var node = new PragmaText(text);
+            node.PropagatePosition(tmp.Position);
+
+            return node;
+        }
+
+        #endregion
+
+        #region Routine
+
         private Routine ParseRoutine()
         {
             var attr = ParseAttribute();
@@ -180,9 +190,10 @@ namespace src.Parser
                 return null;
             }
 
-            if (attr != null) {
-                node.AddChild(attr);
+            if (attr == null) {
+                attr = new RoutineAttribute(Keyword.Entry);
             }
+            node.AddChild(attr);
 
             var id = ParseIdentifier();
             node.AddChild(id);
@@ -301,48 +312,9 @@ namespace src.Parser
             return node;
         }
 
-        private Statement ParseStatement()
-        {
-            var label = ParseLabel();
+        #endregion
 
-            var node = new Statement();
-
-            if (label != null) {
-                node.AddChild(node);
-            }
-
-            AstNode inner = ParseAssemblyBlock();
-            if (inner == null) {
-                inner = ParseExtensionStatement();
-            }
-            if (label == null && inner == null) {
-                return null;
-            }
-
-            node.AddChild(inner);
-
-            return node;
-        }
-
-        private Label ParseLabel()
-        {
-            var t = NextToken();
-            if (!t.IsOperator(Operator.Less)) {
-                _stream.Previous();
-
-                return null;
-            }
-
-            var node = new Label();
-
-            var id = ParseIdentifier();
-            node.AddChild(id);
-
-            t = NextToken();
-            AssertOperator(Operator.Greater, t);
-
-            return node;
-        }
+        #region Variable
 
         private VarDeclaration ParseVarDeclaration()
         {
@@ -470,6 +442,52 @@ namespace src.Parser
 
             return node;
         }
+
+        #endregion
+
+        private Statement ParseStatement()
+        {
+            var label = ParseLabel();
+
+            var inner = TryExtractVariants(new Func<AstNode>[] {
+                ParseAssemblyBlock,
+                ParseExtensionStatement,
+            });
+            if (label == null && inner == null) {
+                return null;
+            }
+
+            var node = new Statement();
+
+            if (label != null) {
+                node.AddChild(node);
+            }
+            node.AddChild(inner);
+
+            return node;
+        }
+
+        private Label ParseLabel()
+        {
+            var t = NextToken();
+            if (!t.IsOperator(Operator.Less)) {
+                _stream.Previous();
+
+                return null;
+            }
+
+            var node = new Label();
+
+            var id = ParseIdentifier();
+            node.AddChild(id);
+
+            t = NextToken();
+            AssertOperator(Operator.Greater, t);
+
+            return node;
+        }
+
+        #region Assembly
 
         private AssemblyBlock ParseAssemblyBlock()
         {
@@ -653,117 +671,223 @@ namespace src.Parser
             return node;
         }
 
-        private AstNode ParseExtensionStatement()
+        #endregion
+
+        private ExtensionStatement ParseExtensionStatement()
+        {
+            var node = TryExtractVariants(new Func<ExtensionStatement>[] {
+                ParseIf,
+                ParseLoop,
+                ParseBreak,
+                ParseGoto,
+                ParseCall,
+                ParseSwap,
+                ParseAssignment,
+            });
+
+            return (ExtensionStatement) node;
+        }
+
+        #region Loop
+
+        private Loop ParseLoop()
+        {
+            var node = TryExtractVariants(new Func<AstNode>[] {
+                ParseForLoop,
+                ParseWhileLoop,
+                ParseInfiniteLoop,
+            });
+
+            return (Loop) node;
+        }
+
+        private ForLoop ParseForLoop()
+        {
+            var node = TryReadNode(Keyword.For, typeof(ForLoop));
+            if (node == null) {
+                return null;
+            }
+
+            var id = ParseIdentifier();
+            node.AddChild(id);
+
+            AstNode ParsePossibleExpression(string keyword)
+            {
+                var t = NextToken();
+                if (!t.IsKeyword(keyword)) {
+                    _stream.Previous();
+
+                    // todo: generate and return empty expression
+                    return null;
+                }
+
+                return ParseExpression();
+            }
+
+            node.AddChild(ParsePossibleExpression(Keyword.From));
+            node.AddChild(ParsePossibleExpression(Keyword.To));
+            node.AddChild(ParsePossibleExpression(Keyword.Step));
+
+            node.AddChild(ParseLoopBody());
+
+            return (ForLoop) node;
+        }
+
+        private WhileLoop ParseWhileLoop()
+        {
+            var node = TryReadNode(Keyword.For, typeof(ForLoop));
+            if (node == null) {
+                return null;
+            }
+
+            node.AddChild(ParseExpression());
+            node.AddChild(ParseLoopBody());
+
+            return (WhileLoop) node;
+        }
+
+        private InfiniteLoop ParseInfiniteLoop()
+        {
+            var body = ParseLoopBody(false);
+            if (body == null) {
+                return null;
+            }
+
+            var node = new InfiniteLoop();
+            node.AddChild(body);
+
+            return node;
+        }
+
+        private LoopBody ParseLoopBody(bool assert = true)
+        {
+            var node = TryReadNode(Keyword.Loop, typeof(LoopBody));
+            if (node == null) {
+                if (assert) {
+                    // todo: throw
+                }
+
+                return null;
+            }
+
+            var block = ParseBlockBody();
+            node.AddChildren(block.Children);
+
+            ValidateBlockEnd(node);
+
+            return (LoopBody) node;
+        }
+
+        #endregion
+
+        private BlockBody ParseBlockBody()
+        {
+            var node = new BlockBody();
+            
+            var statements = ExtractAllChildren(new Func<Statement>[] {
+                ParseStatement
+            });
+
+            node.AddChildren(statements);
+
+            return node;
+        }
+
+        private BreakStatement ParseBreak()
+        {
+            var node = TryReadNode(Keyword.Break, typeof(BreakStatement));
+            if (node == null) {
+                return null;
+            }
+
+            var t = NextToken();
+            AssertDelimiter(Delimiter.Semicolon, t);
+
+            return (BreakStatement) node;
+        }
+
+        private GoToStatement ParseGoto()
+        {
+            var node = TryReadNode(Keyword.Break, typeof(GoToStatement));
+            if (node == null) {
+                return null;
+            }
+
+            var id = ParseIdentifier();
+            node.AddChild(id);
+
+            var t = NextToken();
+            AssertDelimiter(Delimiter.Semicolon, t);
+
+            return (GoToStatement) node;
+        }
+
+        private Assignment ParseAssignment()
         {
             return null;
         }
 
-        private AstNode ParseLoop()
+        private Swap ParseSwap()
         {
             return null;
         }
 
-        private AstNode ParseForLoop()
+        private IfStatement ParseIf()
         {
             return null;
         }
 
-        private AstNode ParseWhileLoop()
+        private RoutineCall ParseCall()
         {
             return null;
         }
 
-        private AstNode ParseLoopBody()
+        private CallArgs ParseCallArgs()
         {
             return null;
         }
 
-        private AstNode ParseBlockBody()
+        private Expression ParseExpression()
         {
             return null;
         }
 
-        private AstNode ParseBreak()
+        private ExpressionOperator ParseOperator()
         {
             return null;
         }
 
-        private AstNode ParseGoto()
+        private CompOperator ParseCompOperator()
         {
             return null;
         }
 
-        private AstNode ParseAssignment()
+        private Operand ParseOperand()
         {
             return null;
         }
 
-        private AstNode ParseSwap()
+        private Primary ParsePrimary()
         {
             return null;
         }
 
-        private AstNode ParseIf()
+        private ArrayAccess ParseArrayAccess()
         {
             return null;
         }
 
-        private AstNode ParseElse()
+        private Reference ParseReference()
         {
             return null;
         }
 
-        private AstNode ParseCall()
+        private Dereference ParseDereference()
         {
             return null;
         }
 
-        private AstNode ParseCallArgs()
-        {
-            return null;
-        }
-
-        private AstNode ParseExpression()
-        {
-            return null;
-        }
-
-        private AstNode ParseOperator()
-        {
-            return null;
-        }
-
-        private AstNode ParseCompOperator()
-        {
-            return null;
-        }
-
-        private AstNode ParseOperand()
-        {
-            return null;
-        }
-
-        private AstNode ParsePrimary()
-        {
-            return null;
-        }
-
-        private AstNode ParseArrayAccess()
-        {
-            return null;
-        }
-
-        private AstNode ParseReference()
-        {
-            return null;
-        }
-
-        private AstNode ParseDereference()
-        {
-            return null;
-        }
-
-        private AstNode ParseExplicitAddress()
+        private ExplicitAddress ParseExplicitAddress()
         {
             return null;
         }
