@@ -1,0 +1,7 @@
+module TestModule
+    start routine foo;
+end
+
+code
+    TestModule.foo(9);
+end

@@ -1,0 +1,31 @@
+ProgramRaw: {
+  Code: {
+    Statement: {
+      Assignment: {
+        Primary: {
+          ArrayAccess: {
+            Identifier(a)
+            Expression: {
+              Operand: {
+                Identifier(b)
+              }
+              ExpressionOperator(+)
+              Operand: {
+                Literal(1)
+              }
+            }
+          }
+        }
+        Expression: {
+          Operand: {
+            Identifier(IND)
+          }
+          ExpressionOperator(*)
+          Operand: {
+            Identifier(b)
+          }
+        }
+      }
+    }
+  }
+}

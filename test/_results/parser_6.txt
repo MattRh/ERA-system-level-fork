@@ -1,0 +1,23 @@
+ProgramRaw: {
+  Code: {
+    Statement: {
+      Assignment: {
+        Primary: {
+          ArrayAccess: {
+            Identifier(a)
+            Expression: {
+              Operand: {
+                Literal(0)
+              }
+            }
+          }
+        }
+        Expression: {
+          Operand: {
+            Literal(10)
+          }
+        }
+      }
+    }
+  }
+}

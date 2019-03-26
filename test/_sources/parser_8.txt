@@ -1,0 +1,8 @@
+routine m(int c): R5 do
+    short a := 1;
+    R5 := a ^ c;
+end
+
+code
+    m(3);
+end

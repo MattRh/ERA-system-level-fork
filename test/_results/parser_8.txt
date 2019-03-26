@@ -1,0 +1,60 @@
+ProgramRaw: {
+  Routine: {
+    RoutineAttribute(entry)
+    Identifier(m)
+    Parameters: {
+      Parameter: {
+        VarType(int)
+        Identifier(c)
+      }
+    }
+    Results: {
+      Register(R5)
+    }
+    RoutineBody: {
+      VarDeclaration: {
+        Variable: {
+          VarType(short)
+          VarDefinition: {
+            Identifier(a)
+            Expression: {
+              Operand: {
+                Literal(1)
+              }
+            }
+          }
+        }
+      }
+      Statement: {
+        Assignment: {
+          Primary: {
+            Register(R5)
+          }
+          Expression: {
+            Operand: {
+              Identifier(a)
+            }
+            ExpressionOperator(^)
+            Operand: {
+              Identifier(c)
+            }
+          }
+        }
+      }
+    }
+  }
+  Code: {
+    Statement: {
+      RoutineCall: {
+        Identifier(m)
+        CallArgs: {
+          Expression: {
+            Operand: {
+              Literal(3)
+            }
+          }
+        }
+      }
+    }
+  }
+}

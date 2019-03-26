@@ -1,0 +1,16 @@
+ProgramRaw: {
+  Code: {
+    Statement: {
+      Assignment: {
+        Primary: {
+          Identifier(a)
+        }
+        Expression: {
+          Operand: {
+            Literal(10)
+          }
+        }
+      }
+    }
+  }
+}

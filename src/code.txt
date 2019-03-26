@@ -11,8 +11,15 @@
     //asm R20 := *R10, if R2 goto R20 end
 //end
 
+//routine m(int c): R5 do
+    //short a[10 * 2], b := 3;
+    //const INA = 29;
+    
+    //a[0] := 10;
+//end
+
 code
-    int a, b;
+    asm R20 := *R10, if R2 goto R20 end
 end
 
 //code

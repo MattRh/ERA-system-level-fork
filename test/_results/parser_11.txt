@@ -1,0 +1,24 @@
+ProgramRaw: {
+  Module: {
+    Identifier(TestModule)
+    Routine: {
+      RoutineAttribute(start)
+      Identifier(foo)
+    }
+  }
+  Code: {
+    Statement: {
+      RoutineCall: {
+        Identifier(TestModule)
+        Identifier(foo)
+        CallArgs: {
+          Expression: {
+            Operand: {
+              Literal(9)
+            }
+          }
+        }
+      }
+    }
+  }
+}

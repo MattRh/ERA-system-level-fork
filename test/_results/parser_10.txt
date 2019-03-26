@@ -1,0 +1,44 @@
+ProgramRaw: {
+  Code: {
+    VarDeclaration: {
+      Variable: {
+        VarType(int)
+        VarDefinition: {
+          Identifier(a)
+        }
+        VarDefinition: {
+          Identifier(b)
+          Expression: {
+            Operand: {
+              Literal(10)
+            }
+          }
+        }
+        VarDefinition: {
+          Identifier(c)
+          Expression: {
+            Operand: {
+              Identifier(a)
+            }
+            ExpressionOperator(*)
+            Operand: {
+              Identifier(b)
+            }
+          }
+        }
+      }
+    }
+    VarDeclaration: {
+      Constant: {
+        ConstDefinition: {
+          Identifier(d)
+          Expression: {
+            Operand: {
+              Literal(100)
+            }
+          }
+        }
+      }
+    }
+  }
+}

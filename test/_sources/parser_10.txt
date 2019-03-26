@@ -1,0 +1,4 @@
+code
+    int a, b := 10, c := a * b;
+    const d = 100;
+end
