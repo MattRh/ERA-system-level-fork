@@ -153,6 +153,7 @@ namespace src.Tokenizer
 
         private bool SimilarTerminalExists(string value)
         {
+            // Could be made faster
             foreach (var terminal in _terminals) {
                 if (terminal.StartsWith(value)) {
                     return true;
