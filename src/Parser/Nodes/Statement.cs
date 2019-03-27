@@ -1,4 +1,5 @@
 using src.Tokenizer;
+using src.Utils;
 
 namespace src.Parser.Nodes
 {
@@ -17,6 +18,10 @@ namespace src.Parser.Nodes
         }
 
         public ExtensionStatement(Token t) : base(t)
+        {
+        }
+
+        public ExtensionStatement(Position pos) : base(pos)
         {
         }
     }

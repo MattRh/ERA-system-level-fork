@@ -678,7 +678,7 @@ namespace src.Parser
                 ParseLoop,
                 ParseBreak,
                 ParseGoto,
-                ParseCall,
+                ParseCall, // Should be before swap and assignment
                 ParseSwap,
                 ParseAssignment,
             });
@@ -920,12 +920,12 @@ namespace src.Parser
             var t = NextToken(false);
             if (t.IsDelimiter(Delimiter.Dot)) {
                 _stream.Next();
-
+                
                 id = ParseIdentifier();
                 node.AddChild(id);
             }
             else if (!t.IsDelimiter(Delimiter.ParenthesisOpen)) {
-                _stream.Previous(); // undo identifier read
+                _stream.Previous(); // Undo identifier read
 
                 return null;
             }

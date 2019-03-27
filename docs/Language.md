@@ -84,7 +84,7 @@
 * **Operator** : `+` | `-` | `*` | `&` | `|` | `^` | `?` | CompOperator
 * **CompOperator** : `=` | `/=` | `<` | `>`
 * **Operand** : Receiver | Reference | Literal
-* **Primary** : Receiver | Dereference | ExplicitAddress
+* **Prima````ry** : Receiver | Dereference | ExplicitAddress
 * **Receiver** : Identifier | ArrayAccess | Register
 * **ArrayAccess** : Identifier`[`Expression`]`
 * **Reference** : `&` Identifier

@@ -1,3 +1,5 @@
+using src.Tokenizer;
+
 namespace src.Parser.Nodes
 {
     public class GoToStatement : ExtensionStatement
@@ -10,6 +12,9 @@ namespace src.Parser.Nodes
 
     public class IfStatement : ExtensionStatement
     {
+        public IfStatement(Token t) : base(t.Position)
+        {
+        }
     }
 
     public class BlockBody : AstNode
