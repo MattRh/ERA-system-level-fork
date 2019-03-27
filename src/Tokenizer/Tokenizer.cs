@@ -88,13 +88,17 @@ namespace src.Tokenizer
                 }
 
                 // Here starts actual checks for token type
-                // If passes this test then it is not identifier or numeric
                 if (SimilarTerminalExists(_readSequence)) {
                     while (SimilarTerminalExists(_readSequence + Source.PeekChar())) {
                         _readSequence += ReadSymbol();
                     }
 
                     if (!_terminals.Contains(_readSequence)) {
+                        if(_identifier.IsMatch(_readSequence)) {
+                            // hack to tokenize identifiers that looks like some terminal start
+                            return MakeToken(TokenType.Identifier, _readSequence);
+                        }
+                        
                         throw TokenizationError.UnknownSymbol(_readSequence, GetPosition());
                     }
 
