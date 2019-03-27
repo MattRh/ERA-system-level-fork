@@ -1,0 +1,25 @@
+pragma save(R11, R12);
+
+data FIB_NUMS 1, 1, 2, 3 end
+
+routine fib(int ind): R10
+do
+    if ind < 4 do
+        R10 := FIB_NUMS[ind];
+    else
+        fib(ind - 1);
+        R11 := R10;
+        
+        fib(ind - 2);
+        R12 := R10;
+    
+        R10 := R11 + R12;
+    end
+end
+
+code
+    int fib_20;
+    
+    fib(20);
+    fib_20 := R10;
+end
