@@ -94,11 +94,11 @@ namespace src.Tokenizer
                     }
 
                     if (!_terminals.Contains(_readSequence)) {
-                        if(_identifier.IsMatch(_readSequence)) {
+                        if (_identifier.IsMatch(_readSequence)) {
                             // hack to tokenize identifiers that looks like some terminal start
                             return MakeToken(TokenType.Identifier, _readSequence);
                         }
-                        
+
                         throw TokenizationError.UnknownSymbol(_readSequence, GetPosition());
                     }
 
